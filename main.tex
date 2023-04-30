@@ -2,7 +2,7 @@
 
 \usepackage{arxiv}
 
-\usepackage[utf8]{inputenc} % allow utf-8 input
+%\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
@@ -10,16 +10,17 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
-\usepackage{cleveref}       % smart cross-referencing
 \usepackage{lipsum}         % Can be removed after putting your text content
 \usepackage{graphicx}
-\usepackage{natbib}
+\usepackage[numbers]{natbib}
 \usepackage{doi}
 
 %% extra
 \usepackage{listings}
 \usepackage{amsmath} 
 \usepackage{xcolor}
+
+\usepackage{cleveref}       % smart cross-referencing
 
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -64,24 +65,26 @@
 \newcommand{\TN}[1]{\textcolor{kwblue}{\texttt{\textbf{TN}}}}
 \newcommand{\FN}[1]{\textcolor{kworange}{\texttt{\textbf{FN}}}}
 
-\newcommand{\PPV}[1]{\texttt{\textbf{PPV}}}
-\newcommand{\TPR}[1]{\texttt{\textbf{TPR}}}
-\newcommand{\MCC}[1]{\texttt{\textbf{MCC}}}
-\newcommand{\Gm}[0]{\texttt{\textbf{G1}}}
-\newcommand{\Fm}[0]{\texttt{\textbf{F1}}}
+\newcommand{\PPV}[0]{\texttt{\textbf{PPV}}}
+\newcommand{\TPR}[0]{\texttt{\textbf{TPR}}}
+\newcommand{\MCC}[0]{\texttt{\textbf{MCC}}}
+\newcommand{\Fowlkes}[0]{\texttt{\textbf{FM}}}
+\newcommand{\Fone}[0]{\texttt{\textbf{F1}}}
 
 
 
 % Based on my blog post
 % https://erotemic.wordpress.com/2019/10/23/closed-form-of-the-mcc-when-tn-inf/
 
-\title{The G1-measure is the limit of the MCC as the number of True negatives approaches infinity}
+\title{
+    The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.
+%    The limit of the MCC as the number of True negatives approaches infinity is the geometric mean of precision and recall
+%    The limit of the MCC as true negatives approach infinity is the geometric mean of precision and recall.
+}
 
-\author{Jon Crall\thanks{https://github.com/Erotemic/ \texttt{erotemic@gmail.com}} \\
-	Staff Researcher and Engineer\\
+\author{\href{https://orcid.org/0009-0008-8455-7514}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Jon Crall}\thanks{https://github.com/Erotemic/ \texttt{erotemic@gmail.com}} \\
 	Kitware Inc.\\
-	\texttt{jon.crall@kitware.com} \\
-	 \\
+	\texttt{jon.crall@kitware.com}
 }
 
 % Uncomment to override  the `A preprint' in the header
@@ -93,41 +96,53 @@
 %%% Once the PDF is generated, you can check the metadata with
 %%% $ pdfinfo template.pdf
 \hypersetup{
-pdftitle={},
-pdfsubject={q-bio.NC, q-bio.QM},
+pdftitle={The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.},
+pdfsubject={q-cs.CV},
 pdfauthor={Jon Crall},
-pdfkeywords={Confusion Matrix, Binary Classification, G1, F1, MCC},
+pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthew's Correlation Coefficient, F1},
 }
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-    The performance of a binary classifier is described by a confusion matrix.
-    The MCC F1, and G1 scores are scalars that summarize a confusion matrix in
-    a single number. Both the F1 and G1 scores are based on
-    precision and recall (the harmonic mean, and geometric mean respectively).
-    Precision and recall are based on 3 / 4 entries in a confusion matrix: \TP{},
-    \FN{}, and \FP{}. In contrast, the Matthew's Correlation Coefficient (MCC) takes
-    into account \TN{} and thus measures all four entries of the confusion matrix.
+    %This paper proves $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}$.
 
-    In this short paper I prove that the G1-measure is the limit of the MCC
-    as the number of true negatives approaches infinity.
+    The performance of a binary classifier is described by a confusion matrix with four entries:
+    the number of true positives (\TP{}), true negatives (\TN{}), false positives (\FP{}), and false
+      negatives (\FN{}).
+
+    The Matthew's Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that
+      summarize a confusion matrix.
+    Both the F1 and FM scores are based on only three of the four entries in the confusion matrix (they
+      ignore \TN{}).
+    In contrast, the MCC takes into account all four entries of the confusion matrix and thus can be seen as
+      providing a more representative picture.
+
+    However, in object detection problems, measuring the number of true negatives is so large it is often
+      intractable.
+    Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
+    This paper provides insight into the relationship between the MCC and FM score by proving that the
+      FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
+
 \end{abstract}
 
 
 % keywords can be removed
-\keywords{Confusion Matrix \and Binary Classification \and G1 \and F1 \and MCC}
+\keywords{Confusion Matrix \and Binary Classification \and Fowlkes--Mallows Index \and Matthew's Correlation Coefficient \and F1}
 
 
 \section{Introduction}
 
-Evaluation of binary classifiers is central to the scientific analysis of machine learning models \cite{powers_evaluation_2011}.
-
-Given a finite set of examples, a machine learning algorithm that predicts a
-binary label for each example, and a set of true labels for each example, the
-quality of the machine learning model can be expressed using a $2 \times 2$
-confusion matrix.
+Evaluation of binary classifiers is central to the quantitative analysis of
+machine learning models \cite{powers_evaluation_2011}.
+%This paper will follow the notation in the Wikipedia article on the Confusion Matrix~\cite{wiki_cfsn} as of 2023-04-30.
+Given a finite set of examples with known real labels, the quality of a set of
+corresponding predicted labels can quantified using a $2 \times 2$ confusion
+matrix.  A confusion matrix counts the number of true positives (\TP{}), true
+negatives (\TN{}), false positives (\FP{}), and false negatives (\FN{}) a model
+predicts with respect to the real labels. The confusion matrix is often written
+as:
 
 \begin{equation}
 \begin{bmatrix}
@@ -136,18 +151,52 @@ confusion matrix.
 \end{bmatrix}	
 \end{equation}
 
-A binary confusion matrix counts the number of true positives (\TP{}), true negatives (\TN{}), false positives (\FP{}), and false negatives (\FN{}).
+This matrix provides a holistic view of classifier quality, however, it is
+often desirable to summarize performance using fewer numbers. Two popular
+metrics defined on a classification matrix are precision and recall.
 
-\section{The Relationship Between MCC and G1}
-\label{sec:headings}
-
-The Fowlkes--Mallows index \cite{fowlkes_method_1983} is defined as:
+Precision --- also known as the positive-predictive-value (PPV) --- is the
+fraction of positive predictions that are correct.
 
 \begin{equation}
-    \Gm{} = \sqrt{\PPV{} \cdot \TPR{}} = \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \cdot \frac{\TP{}}{\TP{} + \FN{}}}
+    \PPV{} = \frac{\TP{}}{\TP{} + \FP{}}
 \end{equation}
 
-The Matthews Correlation Coefficient \cite{matthews_comparison_1975} is defined as:
+Recall --- also known as the true positive rate (TPR), sensitivity, or
+probability of detection (PD) --- is the fraction of real positive cases that
+are correct.
+
+\begin{equation}
+    \TPR{} = \frac{\TP{}}{\TP{} + \FN{}}
+\end{equation}
+
+% https://en.wikipedia.org/wiki/F-score
+One of the most popular confusion metrics is the F1 score. 
+It can be defined as the harmonic mean of precision and recall.
+
+\begin{equation}
+    \Fone{} = \frac{2 \PPV{} \cdot \TPR{}}{\PPV{} + \TPR{}} = \frac{2 \TP{}}{2 \TP{} + \FP{} + \FN{}}
+\end{equation}
+
+% https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index
+A similar, but lesser used metric is the Fowlkes--Mallows index
+\cite{fowlkes_method_1983}, which was originally developed for measuring the
+similarity between two clusterings of a set of points.
+It can be defined as the geometric mean of precision and recall
+\cite{tharwat_classification_2020}.
+
+\begin{equation}
+    \Fowlkes{} = \sqrt{\PPV{} \cdot \TPR{}} = \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}}
+\end{equation}
+
+In \cite{powers_evaluation_2011}, Powers notes that the F1 score (and
+consequentially any metric that only includes precision and recall) only takes
+into account three of the four measures in a confusion matrix. Powers,
+introduces modifications of precision and recall he refers to as informedness
+and markedness. Additionally he advocates for the use of the MCC over the F1
+measure.
+
+The Matthews Correlation Coefficient (MCC) \cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
 
 \begin{equation}
     \MCC{} = \frac{
@@ -158,10 +207,42 @@ The Matthews Correlation Coefficient \cite{matthews_comparison_1975} is defined 
     }}
 \end{equation}
 
+While the MCC is a desirable measure due to its balanced inclusion of all terms in the confusion matrix, it
+  requires that the number of true negatives is measurable.
+In the case of object detection problems \cite{zou2023object}, this is often intractable as the number of
+  the number of predicted boxes and missed true boxes is dwarfed by the total number of boxes that the system
+  correctly did not predict.
+One can see this by considering the set of all $N\times M$ boxes centered at each pixel, most of which will
+  be considered true negatives.
+If the width and height of the boxes are allowed to extend outside the image, then the number of predictable
+  boxes actually is unbounded (and even if they must be contained in the image, there will still be a very
+  large number of them in real world cases).
+
+
+Because calculating the number of true negatives is difficult for open-world problems like object detection,
+  it is conceptually simpler to ignore true negatives and simply focus on the much smaller set of true
+  positives, false positives, and false negatives, which can be used to compute PPV, TPR, F1, and FM.
+While these measures have proven themselves to be effective, simply ignoring true negatives is somewhat
+  unsatisfying.
+We seek to remedy this noting that in these open-world problems the number of true negatives is so large it
+  is effectively infinite and thus we ask the question:
+what happens to the MCC as the number of true negatives approaches infinity?
+
+The main contribution of this paper is to highlight a relationship between the MCC and the FM score.
+The MCC reduces to FM as the number of true negatives approaches infinity.
+While this is not a difficult result to show, to the best of the author's knowledge, this was first shown in
+  a blog post \cite{mcc_blog}, but has not yet been published.
+This paper is a more formal description of this result.
+
+\section{The Relationship Between MCC and FM}
+\label{sec:headings}
+
+\paragraph{Taking the limit of the MCC}
+
 Consider the limit of the MCC as the number of true negatives approaches infinity.
 
 \begin{equation}
-    \lim_{\TN{} \to \infty}
+    \lim_{\TN{} \to \infty} \MCC{} = \lim_{\TN{} \to \infty}
     \frac{
         \TP{} \cdot \TN{} - \FP{} \cdot \FN{}
     }
@@ -170,91 +251,149 @@ Consider the limit of the MCC as the number of true negatives approaches infinit
     }}
 \end{equation}
 
-
-In the limit the terms containing 
-
-This simplifies to:
+We can take the limit of this equation using using L'Hôpital's rule --- i.e.
+the limit is equal to the limit of the derivative of the numerator with respect
+to \TN{} divided by the limit of the denominator with respect to \TN{}.
 
 \begin{equation}
-    \lim_{\TN{} \to \infty} \MCC{} = 
+    = \lim_{\TN{} \to \infty}
+    \frac{
+        \frac{\partial \TP{} \cdot \TN{} - \FP{} \cdot \FN{}}{\partial \TN{}} 
+    }
+    {
+        \frac{\partial \sqrt{(\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})}}{\partial \TN{}}
+    } 
+\end{equation}
+
+The derivative of the numerator simplifies to $\TP{}$ by applying the product
+rule. The derivative of the denominator can be taken using the chain rule and
+product rules. Explicitly showing this process is not too difficult, but it is
+involved. For conciseness we omit the explicit steps and compute the derivative
+symbolically using a computer. Taking the derivative of the numerator and
+denominator we get:
+
+\begin{equation}
+    = \lim_{\TN{} \to \infty}
+    \frac{
+        \TP{} 
+    }
+    {
+        \sqrt{
+            \frac{
+                (\FN{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+            }{
+                4 (\FP{} + \TN{})
+            }} + 
+        \sqrt{
+            \frac{
+                (\FP{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+            }{
+                4 (\FN{} + \TN{})
+            }
+        }
+    }
+\end{equation}
+
+In the limit the terms with \TN{} cancel, resulting in:
+
+
+\begin{equation}
+    =
+    \frac{
+        \TP{} 
+    }
+    {
+        \frac{
+            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+        }{
+            2 
+        } + 
+        \frac{
+            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+        }{
+            2 
+        }
+    } 
+\end{equation}
+
+Thus we find that the limit of
+the MCC as true true negatives approach infinity is:
+
+\begin{equation}
+    = 
     \frac{\TP{}}
     {\sqrt{
-        (\TP{} + \FP{}) \cdot (\TP{} + \FN{}) 
+        (\TP{} + \FP{}) (\TP{} + \FN{}) 
     }}
 \end{equation}
 
-The correctness of this simplification can be verified using SymPy \cite{sympy17}.
+\paragraph{Rearranging the FM}
+
+Now rearranging the equation for FM, we find it is equivalent to the limit of the MCC as the number of true negatives approaches infinity.
+
+\begin{align}
+    \Fowlkes{} &= \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}} \\
+               &= \sqrt{\frac{\TP{}^2}{(\TP{} + \FP{}) (\TP{} + \FN{})}} \\
+               &= \frac{\TP{}}{\sqrt{(\TP{} + \FP{}) (\TP{} + \FN{})}} \\
+               &= \lim_{\TN{} \to \infty} \MCC{}
+\end{align}
+%\end{equation}
+
+\paragraph{Verifying the proof}
+
+The correctness of these claims can be verified using SymPy \cite{sympy17}. We
+define a symbolic expression for the definition of the MCC and FM score. We
+then use SymPy to determine the limit of the MCC as $\TN{} \to \infty$. 
+Finally we subtract expressions that we claim are equal, which will result in
+zero iff they are equal.
+
 
 \begin{lstlisting}[language=Python]
 
 from sympy import sqrt, symbols, simplify
 from sympy.series import limit
 
-tp, tn, fp, fn = symbols(
-    ['tp', 'tn', 'fp', 'fn'], 
-    integer=True,
-    negative=False)
+tp, tn, fp, fn = symbols("tp tn fp fn",
+                         integer=True, negative=False)
 
+# The definition of the MCC
 numer = (tp * tn - fp * fn)
-denom = sqrt(
-    (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+denom = sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
 mcc = numer / denom
 
+# The definition of FM
+FM = sqrt((tp / (tp + fn)) * (tp / (tp + fp)))
+
+# Compute the limit of the MCC definition
 mcc_lim = limit(mcc, tn, float('inf'))
 
-# We claim the above is equal to
-mcc_claim = tp / sqrt((tp + fn) * ((tp + fp)))
+# We claim the limit of the MCC and the FM are equivalant to:
+mcc_lim_claim = tp / sqrt((tp + fn) * ((tp + fp)))
 
-# Check the claim
-assert simplify(mcc_lim - mcc_claim) == 0
-
-\end{lstlisting}
-
-Now rearranging the equation for G1, we find it is equivalent to the limit of the MCC as the number of true negatives approaches infinity.
-
-\begin{align*}
-    \Gm{} &= \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \cdot \frac{\TP{}}{\TP{} + \FN{}}} \\
-          &= \sqrt{\frac{\TP{}^2}{(\TP{} + \FP{}) \cdot (\TP{} + \FN{})}} \\
-          &= \frac{\TP{}}{\sqrt{(\TP{} + \FP{}) \cdot (\TP{} + \FN{})}} \\
-          &= \lim_{\TN{} \to \infty} \MCC{}
-\end{align}
-%\end{equation}
-
-Again, we can verify there are no mistakes using SymPy.
-
-\begin{lstlisting}[language=Python]
-
-from sympy import sqrt, symbols, simplify
-
-tp, fp, fn = symbols(
-    ['tp', 'fp', 'fn'], 
-    integer=True,
-    negative=False)
-
-# Our definition of G1
-G1_def = sqrt((tp / (tp + fn)) * (tp / (tp + fp)))
-
-# We claim that it is equal to this simplification
-G1_claim = tp / sqrt((tp + fn) * ((tp + fp)))
-
-# Check the claim
-assert simplify(G1_def - G1_claim) == 0
+# Check the claim is equal to FM
+assert simplify(FM - mcc_lim_claim) == 0
+# Check the claim is equal to the MCC limit
+assert simplify(mcc_lim - mcc_lim_claim) == 0
 
 \end{lstlisting}
 
-And that's a good place to stop \square{}.
+The above program does not raise an AssertionError, thus we have proven
+$\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
 
 \section{Conclusion}
 
 This paper proves that the limit of the MCC as the number of true negatives
-goes to infinity is equivalent to the G1 score / Fowlkes--Mallows index /
-geometric mean of precision and recall.
+goes to infinity is equivalent to the Fowlkes--Mallows index (i.e. the
+geometric mean of precision and recall).
 
-This is a useful insight in open world problems where the number of true
-negative cases grows faster than the number of other confusion categories.
+This is a useful insight in open world problems where the number of true negative cases grows faster than
+  the number of other confusion categories.
+It validates the use of precision and recall as a way of describing the quality of object detection results
+  and hints that the FM score may be a preferable alternative to the more standard F1 score.
 
 
-
+\bibliographystyle{unsrtnat}
+\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
 
 \end{document}
