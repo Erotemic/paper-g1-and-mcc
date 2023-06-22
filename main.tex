@@ -251,70 +251,122 @@ Consider the limit of the MCC as the number of true negatives approaches infinit
     }}
 \end{equation}
 
-We can take the limit of this equation using using L'Hôpital's rule --- i.e.
-the limit is equal to the limit of the derivative of the numerator with respect
-to \TN{} divided by the limit of the denominator with respect to \TN{}.
+%%% Thanks to Lee Newberg for the cleaner formulation of this limit without L'Hopital's rule!
+We can take this limit by applying some algebra to the body of the limit. We multiply the numerator and denominator by $\frac{1}{\TN{}}$:
 
 \begin{equation}
     = \lim_{\TN{} \to \infty}
-    \frac{
-        \frac{\partial \TP{} \cdot \TN{} - \FP{} \cdot \FN{}}{\partial \TN{}} 
+    \frac{ 
+        \frac{1}{\TN{}} (\TP{} \cdot \TN{} - \FP{} \cdot \FN{}) 
     }
-    {
-        \frac{\partial \sqrt{(\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})}}{\partial \TN{}}
-    } 
+    {\frac{1}{\TN{}} \sqrt{
+        (\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})
+    }} 
 \end{equation}
 
-The derivative of the numerator simplifies to $\TP{}$ by applying the product
-rule. The derivative of the denominator can be taken using the chain rule and
-product rules. Explicitly showing this process is not too difficult, but it is
-involved. For conciseness we omit the explicit steps and compute the derivative
-symbolically using a computer. Taking the derivative of the numerator and
-denominator we get:
+We distribute the $\frac{1}{\TN{}}$ term in the numerator and denominator:
 
 \begin{equation}
     = \lim_{\TN{} \to \infty}
-    \frac{
-        \TP{} 
+    \frac{ 
+        (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
     }
-    {
-        \sqrt{
-            \frac{
-                (\FN{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
-            }{
-                4 (\FP{} + \TN{})
-            }} + 
-        \sqrt{
-            \frac{
-                (\FP{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
-            }{
-                4 (\FN{} + \TN{})
-            }
-        }
-    }
+    {\sqrt{
+        (\TP{} + \FP{}) (\TP{} + \FN{}) (\frac{\TN{} + \FP{}}{\TN{}}) (\frac{\TN{} + \FN{}}{\TN{}})
+    }}
 \end{equation}
 
-In the limit the terms with \TN{} cancel, resulting in:
-
+The $\frac{\TN{}}{\TN{}}$ terms in the denominator cancel:
 
 \begin{equation}
-    =
-    \frac{
-        \TP{} 
+    = \lim_{\TN{} \to \infty}
+    \frac{ 
+        (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
     }
-    {
-        \frac{
-            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
-        }{
-            2 
-        } + 
-        \frac{
-            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
-        }{
-            2 
-        }
-    } 
+    {\sqrt{
+        (\TP{} + \FP{}) (\TP{} + \FN{}) (1 + \frac{\FP{}}{\TN{}}) (1 + \frac{\FN{}}{\TN{}})
+    }}
 \end{equation}
+
+The terms involving $\TN{}$ are fractions of simple rational polynomials
+(w.r.t. $\TN{}$) and in each case the degree of the denominator is greater
+than that of the numerator, so in the limit each of these terms simplifies to
+$0$. Thus, the entire equation simplifies to:
+
+\begin{equation}
+    = 
+    \frac{ 
+        (\TP{} - \FP{} \cdot 0) 
+    }
+    {\sqrt{
+        (\TP{} + \FP{}) (\TP{} + \FN{}) (1 + 0) (1 + 0)
+    }}
+\end{equation}
+
+%We can take the limit of this equation using using L'Hôpital's rule --- i.e.
+%the limit is equal to the limit of the derivative of the numerator with respect
+%to \TN{} divided by the limit of the denominator with respect to \TN{}.
+
+%\begin{equation}
+%    = \lim_{\TN{} \to \infty}
+%    \frac{
+%        \frac{\partial \TP{} \cdot \TN{} - \FP{} \cdot \FN{}}{\partial \TN{}} 
+%    }
+%    {
+%        \frac{\partial \sqrt{(\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})}}{\partial \TN{}}
+%    } 
+%\end{equation}
+
+%The derivative of the numerator simplifies to $\TP{}$ by applying the product
+%rule. The derivative of the denominator can be taken using the chain rule and
+%product rules. Explicitly showing this process is not too difficult, but it is
+%involved. For conciseness we omit the explicit steps and compute the derivative
+%symbolically using a computer. Taking the derivative of the numerator and
+%denominator we get:
+
+%\begin{equation}
+%    = \lim_{\TN{} \to \infty}
+%    \frac{
+%        \TP{} 
+%    }
+%    {
+%        \sqrt{
+%            \frac{
+%                (\FN{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+%            }{
+%                4 (\FP{} + \TN{})
+%            }} + 
+%        \sqrt{
+%            \frac{
+%                (\FP{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+%            }{
+%                4 (\FN{} + \TN{})
+%            }
+%        }
+%    }
+%\end{equation}
+
+%In the limit the terms with \TN{} cancel, resulting in:
+
+
+%\begin{equation}
+%    =
+%    \frac{
+%        \TP{} 
+%    }
+%    {
+%        \frac{
+%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+%        }{
+%            2 
+%        } + 
+%        \frac{
+%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+%        }{
+%            2 
+%        }
+%    } 
+%\end{equation}
 
 Thus we find that the limit of
 the MCC as true true negatives approach infinity is:
@@ -345,7 +397,7 @@ The correctness of these claims can be verified using SymPy \cite{sympy17}. We
 define a symbolic expression for the definition of the MCC and FM score. We
 then use SymPy to determine the limit of the MCC as $\TN{} \to \infty$. 
 Finally we subtract expressions that we claim are equal, which will result in
-zero iff they are equal.
+zero only if they are equal.
 
 
 \begin{lstlisting}[language=Python]
