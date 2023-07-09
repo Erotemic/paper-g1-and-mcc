@@ -18,3 +18,8 @@ However, in object detection problems, measuring the number of true negatives is
 ### Notes
 
 This repo derived from the arxiv style Latex Template: https://github.com/kourgeorge/arxiv-style
+
+
+### Links
+
+The arXiv paper: https://arxiv.org/abs/2305.00594

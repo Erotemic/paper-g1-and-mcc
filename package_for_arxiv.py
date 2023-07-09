@@ -14,6 +14,11 @@ def main():
         'orcid.pdf',
     ]
     zip_fpath = dname + '.zip'
+    import os
+
+    zip_fpath = pathlib.Path(zip_fpath)
+    os.unlink(zip_fpath)
+
     zfile = zipfile.ZipFile(zip_fpath, mode='w',
                             compression=zipfile.ZIP_DEFLATED, compresslevel=9)
     with zfile:
