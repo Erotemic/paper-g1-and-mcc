@@ -17,7 +17,8 @@ def main():
     import os
 
     zip_fpath = pathlib.Path(zip_fpath)
-    os.unlink(zip_fpath)
+    if zip_fpath.exists():
+        os.unlink(zip_fpath)
 
     zfile = zipfile.ZipFile(zip_fpath, mode='w',
                             compression=zipfile.ZIP_DEFLATED, compresslevel=9)

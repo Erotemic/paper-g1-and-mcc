@@ -251,10 +251,10 @@ Consider the limit of the MCC as the number of true negatives approaches infinit
     }}
 \end{equation}
 
-%%% Thanks to Lee Newberg for the cleaner formulation of this limit without L'Hopital's rule!
+%%% Thanks to Lee Newberg for the cleaner formulation of this limit without L'Hôpital's rule!
 We can take this limit by applying some algebra to the body of the limit. We multiply the numerator and denominator by $\frac{1}{\TN{}}$:
 
-\begin{equation}
+\begin{equation}\label{eq:lee_step1}
     = \lim_{\TN{} \to \infty}
     \frac{ 
         \frac{1}{\TN{}} (\TP{} \cdot \TN{} - \FP{} \cdot \FN{}) 
@@ -266,7 +266,7 @@ We can take this limit by applying some algebra to the body of the limit. We mul
 
 We distribute the $\frac{1}{\TN{}}$ term in the numerator and denominator:
 
-\begin{equation}
+\begin{equation}\label{eq:lee_step2}
     = \lim_{\TN{} \to \infty}
     \frac{ 
         (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
@@ -278,7 +278,7 @@ We distribute the $\frac{1}{\TN{}}$ term in the numerator and denominator:
 
 The $\frac{\TN{}}{\TN{}}$ terms in the denominator cancel:
 
-\begin{equation}
+\begin{equation}\label{eq:lee_step3}
     = \lim_{\TN{} \to \infty}
     \frac{ 
         (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
@@ -293,7 +293,7 @@ The terms involving $\TN{}$ are fractions of simple rational polynomials
 than that of the numerator, so in the limit each of these terms simplifies to
 $0$. Thus, the entire equation simplifies to:
 
-\begin{equation}
+\begin{equation}\label{eq:postlimit}
     = 
     \frac{ 
         (\TP{} - \FP{} \cdot 0) 
@@ -369,7 +369,7 @@ $0$. Thus, the entire equation simplifies to:
 %\end{equation}
 
 Thus we find that the limit of
-the MCC as true true negatives approach infinity is:
+the MCC as true negatives approach infinity is:
 
 \begin{equation}
     = 
@@ -444,6 +444,10 @@ This is a useful insight in open world problems where the number of true negativ
 It validates the use of precision and recall as a way of describing the quality of object detection results
   and hints that the FM score may be a preferable alternative to the more standard F1 score.
 
+
+\section{Acknowledgements}
+
+Thanks to Lee Newberg for the cleaner formulation of \cref{eq:lee_step1,eq:lee_step2,eq:lee_step3} to achieve \cref{eq:postlimit} without needing L'Hôpital's rule.
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
