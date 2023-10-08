@@ -114,9 +114,9 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
 
     The Matthew's Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that
       summarize a confusion matrix.
-    Both the F1 and FM scores are based on only three of the four entries in the confusion matrix (they
+    Both the F1 and FM scores are based on only three of the four entries in a confusion matrix (they
       ignore \TN{}).
-    In contrast, the MCC takes into account all four entries of the confusion matrix and thus can be seen as
+    In contrast, the MCC takes into account all four entries of a confusion matrix and thus can be seen as
       providing a more representative picture.
 
     However, in object detection problems, measuring the number of true negatives is so large it is often
@@ -141,8 +141,7 @@ Given a finite set of examples with known real labels, the quality of a set of
 corresponding predicted labels can quantified using a $2 \times 2$ confusion
 matrix.  A confusion matrix counts the number of true positives (\TP{}), true
 negatives (\TN{}), false positives (\FP{}), and false negatives (\FN{}) a model
-predicts with respect to the real labels. The confusion matrix is often written
-as:
+predicts with respect to the real labels. A confusion matrix is written as:
 
 \begin{equation}
 \begin{bmatrix}
@@ -179,7 +178,7 @@ It can be defined as the harmonic mean of precision and recall.
 \end{equation}
 
 % https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index
-A similar, but lesser used metric is the Fowlkes--Mallows index
+A similar, but less used metric is the Fowlkes--Mallows index
 \cite{fowlkes_method_1983}, which was originally developed for measuring the
 similarity between two clusterings of a set of points.
 It can be defined as the geometric mean of precision and recall
@@ -207,7 +206,7 @@ The Matthews Correlation Coefficient (MCC) \cite{matthews_comparison_1975} accou
     }}
 \end{equation}
 
-While the MCC is a desirable measure due to its balanced inclusion of all terms in the confusion matrix, it
+While the MCC is a desirable measure due to its balanced inclusion of all terms in a confusion matrix, it
   requires that the number of true negatives is measurable.
 In the case of object detection problems \cite{zou2023object}, this is often intractable as the number of
   the number of predicted boxes and missed true boxes is dwarfed by the total number of boxes that the system
