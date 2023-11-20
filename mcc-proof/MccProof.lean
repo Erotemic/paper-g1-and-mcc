@@ -8,8 +8,6 @@ open Real
 open NNReal 
 
 
-section mcc_section
-
 -- The definition of the MCC
 noncomputable def MCC (tp tn fp fn : ℝ≥0) : ℝ := 
     ( tp * tn - fp * fn ) / 
@@ -21,9 +19,9 @@ noncomputable def FM (tp fp fn : ℝ≥0) : ℝ≥0 :=
 
 --- The overall goal
 
-variable (tp fp fn : ℝ≥0)
-noncomputable def MCC_tn := fun (tn : ℝ≥0) => MCC tp tn fp fn
-noncomputable def FM_ := FM tp fp fn
+--variable (tp fp fn : ℝ≥0)
+--noncomputable def MCC_tn := fun (tn : ℝ≥0) => MCC tp tn fp fn
+--noncomputable def FM_ := FM tp fp fn
 
 /-
 --- What needs to be shown:
@@ -50,6 +48,12 @@ theorem sqrt_one : Real.sqrt 1 = 1 := by {
   rw [sqrt_eq_one]
 }
 
+theorem sqrt_inv_rule (a b: ℝ≥0) : NNReal.sqrt (a⁻¹ * b⁻¹) = (NNReal.sqrt (a * b))⁻¹ := by {
+    rw [← NNReal.sqrt_inv]
+    rw [mul_inv_rev]
+    rw [mul_comm]
+}
+
 theorem sqrt_of_square (a c : ℝ≥0) : NNReal.sqrt (a * a * c) = a * NNReal.sqrt (c):= by {
   rw [NNReal.sqrt_mul]
   rw [NNReal.sqrt_mul_self]
@@ -74,18 +78,91 @@ theorem FM_simplify : FM_v1 tp fp fn = FM_v2 tp fp fn := by {
   rw [div_eq_inv_mul]
   rw [div_eq_inv_mul]
   rw [div_eq_inv_mul]
-  have u1 := (tp + fn)⁻¹
-  have u2 := (tp + fp)⁻¹
-  rw [u1]
-
-  rw [mul_comm (tp + fn)⁻¹ tp]
-  rw [mul_comm (tp + fp)⁻¹ tp]
-  
-  --rw [← mul_assoc (tp + fn)⁻¹ tp (tp + fp)⁻¹]
-  --rw [← mul_assoc (tp + fp)⁻¹]
-
+  generalize h1 : (tp + fn) = u1
+  generalize h2 : (tp + fp) = u2
+  generalize h3 : u1⁻¹ = u3
+  generalize h4 : u2⁻¹ = u4
+  rw [mul_comm u3 tp]
+  rw [mul_comm u4 tp]   
+  rw [mul_assoc tp u3]  
+  rw [← mul_assoc u3]   
+  rw [mul_comm u3 tp]   
+  rw [mul_assoc tp]   
+  rw [← mul_assoc tp]   
+  rw [sqrt_of_square]
+  rw [← h3]
+  rw [← h4]
+  rw [sqrt_inv_rule]
+  rw [mul_comm tp]
 }
 
+
+--- Breakup The MCC and try to tackle smaller parts of the problem
+
+noncomputable def MCC_v2 (tp tn fp fn : ℝ) := 
+    (tp - fp * (fn / tn)) / 
+        Real.sqrt (( tp + fp ) * ( tp + fn ) * ( 1 + fp/tn ) * ( 1 + fn/tn ) )
+
+noncomputable def MCC_numer_v1 (tp tn fp fn : ℝ) := 
+    ( tp * tn - fp * fn )
+    
+noncomputable def MCC_sqrd_denom_v1 (tp tn fp fn : ℝ) := 
+        ( tp + fp ) * ( tp + fn ) * ( tn + fp ) * ( tn + fn )
+
+noncomputable def MCC_numer_v2 (tp tn fp fn : ℝ) := 
+     tn * (tp - fp * (fn / tn))
+    
+noncomputable def MCC_sqrd_denom_v2 (tp tn fp fn : ℝ) := 
+        tn * tn *  ( 1 + fp/tn ) * ( tp + fp ) * ( tp + fn ) * ( 1 + fn/tn ) 
+
+
+-- FIXME: What's the right way to prove these?
+-- We need to encode the assumption that a > 0
+-- but I dont know how
+axiom factor_rule (a b : ℝ≥0):
+    a * a * (1 + b/a) = a * (a + b)
+    --(a + b) = a * ( 1 + b/a) := by {
+--    := by {
+--      ring_nf
+      --conv =>
+      --rhs
+      --rw [mul_assoc] 
+--    }
+
+axiom factor_rule2 (a b : ℝ):
+    a * a * (1 + b/a) = a * (a + b)
+
+axiom factor_rule3 (tn fn u1 u2 u3: ℝ≥0):
+    tn * u3 * u1 * u2 * (1 + fn / tn) = u3 * u1 * u2 * (tn + fn)
+
+
+theorem mcc_numers_eq 
+    (tp tn fp fn : ℝ≥0)
+    --(tn_is_pos: tn > 0)
+    : 
+    ( tp + fp ) * ( tp + fn ) * ( tn + fp ) * ( tn + fn ) = 
+    tn * tn *  ( 1 + fp/tn ) * ( tp + fp ) * ( tp + fn ) * ( 1 + fn/tn )  := by {
+  -- generalize 
+  rw [factor_rule tn fp]
+  generalize h1 : tp + fp = u1
+  generalize h2 : tp + fn = u2
+  generalize h3 : tn + fp = u3
+  generalize h4 : tn + fn = u4
+  rw [factor_rule3]
+  rw [← h1]
+  rw [← h2]
+  rw [← h3]
+  rw [← h4]
+  ring
+  -- rw [MCC_sqrd_denom_v1]
+  -- rw [MCC_sqrd_denom_v2] -- why did I get unbound variables?
+  --rw [factor_rule tn fn]
+  --conv =>
+  --rhs
+  --rw [mul_comm]
+  --rw [mul_comm]
+  --rw [← mul_assoc mcc_numers_eq.rhs]
+}
 
 
 /-
@@ -184,12 +261,11 @@ Limit(MCC) = tp / Real.sqrt ( ( tp + fp ) * ( tp + fn ) )
 
 FM 
 
-* Not sure what the matlib names for these are:
-* Axiom mul_fractions : (a/b) * (c/d) = (a * b) / (c * d)
-* Axiom div_is_mul_inv : a / b = a * b⁻¹
-* Axiom sqrt_of_square : Real.sqrt(a * a * c) = a * Real.sqrt(c)
-* Axiom sqrt_of_frac : Real.sqrt(a / b) = Real.sqrt(a) * Real.sqrt(b)
-* Axiom sqrt_one : Real.sqrt(1) = 1
+* Given mul_fractions : (a/b) * (c/d) = (a * b) / (c * d)
+* Given div_is_mul_inv : a / b = a * b⁻¹
+* Given sqrt_of_square : Real.sqrt(a * a * c) = a * Real.sqrt(c)
+* Given sqrt_of_frac : Real.sqrt(a / b) = Real.sqrt(a) * Real.sqrt(b)
+* Given sqrt_one : Real.sqrt(1) = 1
 
 * Expanding the FM:
 
@@ -226,49 +302,6 @@ FM = tp / Real.sqrt( ( tp + fn ) * ( tp + fp ) )
 * Thus We find
 
 Lim(MCC) = FM by exact
-
--/
-
---- Breakup The MCC and try to tackle smaller parts of the problem
-
-noncomputable def MCC_v2 (tp tn fp fn : ℝ) : ℝ := 
-    (tp - fp * (fn / tn)) / 
-        Real.sqrt (( tp + fp ) * ( tp + fn ) * ( 1 + fp/tn ) * ( 1 + fn/tn ) )
-
-noncomputable def MCC_numer_v1 (tp tn fp fn : ℝ) : ℝ := 
-    ( tp * tn - fp * fn )
-    
-noncomputable def MCC_sqrd_denom_v1 (tp tn fp fn : ℝ) : ℝ := 
-        ( tp + fp ) * ( tp + fn ) * ( tn + fp ) * ( tn + fn )
-
-noncomputable def MCC_numer_v2 (tp tn fp fn : ℝ) : ℝ := 
-     tn * (tp - fp * (fn / tn))
-    
-noncomputable def MCC_sqrd_denom_v2 (tp tn fp fn : ℝ) : ℝ := 
-        tn *  ( 1 + fp/tn ) * ( tp + fp ) * ( tp + fn ) * ( 1 + fn/tn ) 
-
-/-
-theorem show_part 
-    (tn_is_pos: tn > 0) (fp_is_pos: fp > 0):
-    (tn * fp) = tn * ( 1 + fp/tn) := by {
-      conv =>
-      rhs
-      rw [mul_assoc] 
-
-      -- inv_mul_cancel_left
-      -- case right =>
-
-    }
-
-theorem mcc_numers_eq 
-    (tp tn fp fn : ℝ) (tp_is_pos: tp > 0) 
-    (tn_is_pos: tn > 0) (fp_is_pos: fp > 0) (fn_is_pos: fn > 0): 
-    (MCC_sqrd_denom_v1 tp tn fp fn) = (MCC_sqrd_denom_v2 tp tn fp fn) := by {
-  
-  rw [MCC_sqrd_denom_v1]
-  rw [MCC_sqrd_denom_v2]
-  --rw [← mul_assoc mcc_numers_eq.rhs]
-}
 
 -/
 
@@ -312,7 +345,10 @@ theorem tendsto_MCC_tn_atTop_FM : Tendsto MCC_tn atTop (nhds FM_) := by {
 -- theorem foobar : MCC_tn = ()
 
 
-end mcc_section
+
+--section mcc_section
+
+--end mcc_section
 
 
 example (a b c : ℝ) : (a * b) * c = b * (a * c) := by {
