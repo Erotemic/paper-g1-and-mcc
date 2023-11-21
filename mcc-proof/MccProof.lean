@@ -1,4 +1,5 @@
 -- This is a WIP as I learn lean in order to codify the proof
+-- https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/Help.20Understanding.20Goal.20Manipulation
 import Mathlib
 import Lake
 import Mathlib.Tactic.Positivity
@@ -9,7 +10,7 @@ open NNReal
 
 
 -- The definition of the MCC
-noncomputable def MCC (tp tn fp fn : ℝ≥0) : ℝ := 
+noncomputable def MCC (tp tn fp fn : ℝ≥0) := 
     ( tp * tn - fp * fn ) / 
         NNReal.sqrt (( tp + fp ) * ( tp + fn ) * ( tn + fp ) * ( tn + fn ) )
 
