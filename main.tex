@@ -231,7 +231,20 @@ The main contribution of this paper is to highlight a relationship between the M
 The MCC reduces to FM as the number of true negatives approaches infinity.
 While this is not a difficult result to show, to the best of the author's knowledge, this was first shown in
   a blog post \cite{mcc_blog}, but has not yet been published.
-This paper is a more formal description of this result.
+This paper is a more formal description of this result. Specifically, the
+contributions are:
+
+\begin{itemize}
+
+    \item We informally (but rigorously) prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$.
+
+    %\item We formally prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in lean4.
+
+    %\lim_{TN → ∞} MCC = FM$
+
+\end{itemize}
+
+
 
 \section{The Relationship Between MCC and FM}
 \label{sec:headings}
