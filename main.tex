@@ -124,6 +124,7 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
     Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
     This paper provides insight into the relationship between the MCC and FM score by proving that the
       FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
+    A Lean formalization is included.
 
 \end{abstract}
 
@@ -238,7 +239,7 @@ contributions are:
 
     \item We informally (but rigorously) prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$.
 
-    %\item We formally prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in lean4.
+    \item We formally prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in Lean~4.
 
     %\lim_{TN → ∞} MCC = FM$
 
@@ -444,6 +445,60 @@ assert simplify(mcc_lim - mcc_lim_claim) == 0
 The above program does not raise an AssertionError, thus we have proven
 $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
+\section{Formal Verification with Lean}
+\label{sec:lean}
+
+This section is an addendum. The original body of this paper was written on
+2023-07-11; the Lean formalization and this section were added on 2025-11-29.
+
+We formalized the main result in Lean~4~\cite{moura2021lean}, an interactive
+theorem prover with a small trusted kernel.  A Lean proof provides a
+machine-checked guarantee that each algebraic manipulation and limit argument
+used in the informal derivation is valid under explicit assumptions.
+
+The main theorem is expressed as a limit along \code{atTop} on the true-negative
+coordinate:
+
+\begin{lstlisting}
+/-- Main theorem: as TN → ∞, MCC converges to FM. -/
+theorem MCC_atTop_eq_FM
+    {TP FP FN : ℝ}
+    (hTP_pos   : 0 < TP)
+    (h_den_pos : 0 < (TP + FP) * (TP + FN)) :
+    Tendsto (fun TN => MCC TP TN FP FN) atTop (𝓝 (FM TP FP FN)) := by
+  -- See the full 654-line proof in:
+  -- MCC_atTop_eq_FM/Main.lean
+\end{lstlisting}
+
+Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
+the formulas in this paper. The full proof is 654 lines. It is available in
+these forms:
+
+\begin{itemize}
+\item GitHub permalink: \\
+\href{https://github.com/Erotemic/paper-g1-and-mcc/blob/1d8637885b53bd142c306db991c8792c4aefb3e2/mcc-proof/MCC_atTop_eq_FM/Main.lean}{%
+    \texttt{https://github.com/Erotemic/paper-g1-and-mcc/blob/}\\%
+    \texttt{1d8637885b53bd142c306db991c8792c4aefb3e2/}%
+\texttt{mcc-proof/MCC\_atTop\_eq\_FM/Main.lean}}
+
+\item IPFS snapshot (CID): \\
+\href{https://ipfs.io/ipfs/bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky}{%
+\texttt{https://ipfs.io/ipfs/}%
+\texttt{bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky}}
+\end{itemize}
+
+
+The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
+file content, providing redundancy against link rot.
+
+
+\paragraph{Construction with large language models}
+
+The Lean proof was assembled interactively with assistance from the GPT-5.1
+model~\cite{openai_gpt}.  Earlier attempts using the GPT-5 and GPT-4o models
+were not successful in producing working Lean proof. GPT-5.1 was able to
+complete the proof, but it required feedback from lean, and made simple syntax
+errors.
 
 \section{Conclusion}
 
