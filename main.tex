@@ -459,16 +459,16 @@ used in the informal derivation is valid under explicit assumptions.
 The main theorem is expressed as a limit along \code{atTop} on the true-negative
 coordinate:
 
-\begin{lstlisting}
-/-- Main theorem: as TN → ∞, MCC converges to FM. -/
-theorem MCC_atTop_eq_FM
-    {TP FP FN : ℝ}
-    (hTP_pos   : 0 < TP)
-    (h_den_pos : 0 < (TP + FP) * (TP + FN)) :
-    Tendsto (fun TN => MCC TP TN FP FN) atTop (𝓝 (FM TP FP FN)) := by
-  -- See the full 654-line proof in:
-  -- MCC_atTop_eq_FM/Main.lean
-\end{lstlisting}
+\noindent
+\texttt{/-- Main theorem: as TN }$\to \infty$\texttt{, MCC converges to FM. -/}\\
+\texttt{theorem MCC\_atTop\_eq\_FM}\\
+\texttt{\{TP FP FN : }$\mathbb{R}$\texttt{\}}\\
+\texttt{(hTP\_pos   : 0 < TP)}\\
+\texttt{(h\_den\_pos : 0 < (TP + FP) * (TP + FN)) :}\\
+\texttt{Tendsto (fun TN => MCC TP TN FP FN) atTop (}$\mathcal{N}$\texttt{ (FM TP FP FN)) := by}\\
+\texttt{-- See the full 654-line proof in:}\\
+\texttt{-- MCC\_atTop\_eq\_FM/Main.lean}
+
 
 Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
 the formulas in this paper. The full proof is 654 lines. It is available in
