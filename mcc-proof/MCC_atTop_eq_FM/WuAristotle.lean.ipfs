@@ -1,0 +1,17 @@
+type: ipfs-sidecar
+cid: bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
+rel_path: WuAristotle.lean
+size: 3.07 KiB
+num_items: 1
+add_config:
+  path: WuAristotle.lean
+  name:
+  recursive: true
+  progress: true
+  cid_version: 1
+  raw_leaves: false
+  only_hash: false
+  pin: true
+  sidecar: true
+add_datetime: 2026-02-16T165248-5
+add_duration: 1.1426180790003855

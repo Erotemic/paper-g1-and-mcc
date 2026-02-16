@@ -112,20 +112,21 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
     the number of true positives (\TP{}), true negatives (\TN{}), false positives (\FP{}), and false
       negatives (\FN{}).
 
-    The Matthew's Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that
+    The Matthews Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that
       summarize a confusion matrix.
     Both the F1 and FM scores are based on only three of the four entries in a confusion matrix (they
       ignore \TN{}).
     In contrast, the MCC takes into account all four entries of a confusion matrix and thus can be seen as
       providing a more representative picture.
 
-    However, in object detection problems, measuring the number of true negatives is so large it is often
-      intractable.
+    However, in object detection problems, the number of true negatives is effectively unbounded.
     Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
     This paper provides insight into the relationship between the MCC and FM score by proving that the
       FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
-    A Lean formalization is included.
-
+    \emph{Update 2026-01-28:} This proof was previously published in ecology literature in terms of the phi
+      coefficient and the Ochiai similarity, but we discuss it in the context of binary classifiers.
+    We formalize the proof in Lean using AI-assistance and also comment on the use of AI in locating prior
+      work.
 \end{abstract}
 
 
@@ -179,22 +180,18 @@ It can be defined as the harmonic mean of precision and recall.
 \end{equation}
 
 % https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index
-A similar, but less used metric is the Fowlkes--Mallows index
-\cite{fowlkes_method_1983}, which was originally developed for measuring the
-similarity between two clusterings of a set of points.
-It can be defined as the geometric mean of precision and recall
-\cite{tharwat_classification_2020}.
+A similar, but less used metric is the Fowlkes-Mallows index~\cite{fowlkes_method_1983}, which was
+  originally developed for measuring the similarity between two clusterings of a set of points.
+It can be defined as the geometric mean of precision and recall~\cite{tharwat_classification_2020}.
 
 \begin{equation}
     \Fowlkes{} = \sqrt{\PPV{} \cdot \TPR{}} = \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}}
 \end{equation}
 
-In \cite{powers_evaluation_2011}, Powers notes that the F1 score (and
-consequentially any metric that only includes precision and recall) only takes
-into account three of the four measures in a confusion matrix. Powers,
-introduces modifications of precision and recall he refers to as informedness
-and markedness. Additionally he advocates for the use of the MCC over the F1
-measure.
+In~\cite{powers_evaluation_2011}, Powers notes that the F1 score (and consequentially any metric that only
+  includes precision and recall) only takes into account three of the four measures in a confusion matrix.
+Powers, introduces modifications of precision and recall he refers to as informedness and markedness.
+Additionally he advocates for the use of the MCC over the F1 measure.
 
 The Matthews Correlation Coefficient (MCC) \cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
 
@@ -228,12 +225,33 @@ We seek to remedy this noting that in these open-world problems the number of tr
   is effectively infinite and thus we ask the question:
 what happens to the MCC as the number of true negatives approaches infinity?
 
-The main contribution of this paper is to highlight a relationship between the MCC and the FM score.
-The MCC reduces to FM as the number of true negatives approaches infinity.
-While this is not a difficult result to show, to the best of the author's knowledge, this was first shown in
-  a blog post \cite{mcc_blog}, but has not yet been published.
-This paper is a more formal description of this result. Specifically, the
-contributions are:
+The main contribution of this paper is to highlight a relationship between the MCC and the FM score:
+the MCC reduces to FM as the number of true negatives approaches infinity.
+
+% TODO: REVISE WORDING
+\paragraph{Related work and terminology.}
+In vegetation science and community ecology, $2\times 2$ contingency tables are commonly used to measure
+association/similarity between two binary variables (e.g. the presence/absence of a species and membership
+in a site group).
+In that literature, the MCC is typically referred to as the \emph{phi coefficient} (or $\phi$ coefficient),
+and the regime where true negatives become dominant is described as adding many \emph{double zeros}
+(joint absences).
+In this context, De C\'aceres et al.~\cite{decaceres_assessing_species_2008} compare the phi coefficient to its
+limit value in large data sets, which they identify with the \emph{Ochiai index}.
+De C\'aceres and Legendre~\cite{caceres_associations_species_2009} explicitly note that adding an infinite amount of
+double zeros drives the correlation-form index to the Ochiai~(1957) similarity coefficient~\cite{ochiai_zoogeographic_studies_1957}.
+Under the standard confusion-matrix identification $(a,b,c,d)=(\TP{},\FP{},\FN{},\TN{})$, the Ochiai
+coefficient is
+\[
+    \mathrm{Ochiai} = \frac{\TP{}}{\sqrt{(\TP{}+\FP{})(\TP{}+\FN{})}}
+    = \sqrt{\PPV{}\cdot\TPR{}},
+\]
+which is exactly the FM index.
+Our aim is to make this relationship explicit in modern machine-learning notation, motivated by open-world
+object detection, and to provide a mechanically checked formalization.
+% /TODO: REVISE WORDING
+
+Specifically, the contributions are:
 
 \begin{itemize}
 
@@ -241,7 +259,8 @@ contributions are:
 
     \item We formally prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in Lean~4.
 
-    %\lim_{TN → ∞} MCC = FM$
+    \item We connect the ``double-zero'' discussion from ecology to the object detection
+          setting, where the number of true negatives is effectively unbounded.
 
 \end{itemize}
 
@@ -482,24 +501,61 @@ these forms:
     \texttt{1d8637885b53bd142c306db991c8792c4aefb3e2/}%
 \texttt{mcc-proof/MCC\_atTop\_eq\_FM/Main.lean}}
 
+%** TODO: Add sha256 checksum **
+
 \item IPFS snapshot (CID): \\
-\href{https://ipfs.io/ipfs/bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky}{%
+\href{https://ipfs.io/ipfs/bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}{%
 \texttt{https://ipfs.io/ipfs/}%
-\texttt{bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky}}
+\texttt{bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}}
 \end{itemize}
+
+%# Aristotle version
+%bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
+
+%# GPT 5.1 version
+%bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky
 
 
 The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
-file content, providing redundancy against link rot.
+file content, providing redundancy against link rot and build-in checksum
+verification.
 
+\section{AI Usage}
+\label{sec:ai_usage}
 
 \paragraph{Construction with large language models}
-
 The Lean proof was assembled interactively with assistance from the GPT-5.1
-model~\cite{openai_gpt}.  Earlier attempts using the GPT-5 and GPT-4o models
-were not successful in producing working Lean proof. GPT-5.1 was able to
-complete the proof, but it required feedback from lean, and made simple syntax
-errors.
+  model~\cite{openai_gpt5_system_card}.
+Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_card} were not successful in
+  producing working Lean proof.
+GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from lean and was
+  prone to syntax errors.
+Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
+  leanprover.zulipchat refined this to 66 lines (including comments).
+
+% Note aristotle proof
+
+\paragraph{Note on discovery and terminology drift.}
+The relationship proved in this paper was initially investigated by the author under the terminology of
+binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
+open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
+While searching within this vocabulary did not reveal an explicit prior statement of the limit,
+we later found closely related discussion in the ecology literature expressed using different names
+for the same $2\times 2$ contingency table quantities (phi coefficient, double zeros, and the Ochiai similarity).
+Modern AI-assisted semantic search was instrumental in suggesting this alternate terminology, after which the
+connection was verified directly by reading the cited sources and translating notation.
+
+\paragraph{Note on discovery and terminology drift.}
+The relationship proved in this paper was initially investigated by the author under the terminology of
+binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
+open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
+Searching within this vocabulary did not reveal an explicit prior statement of the limit.
+We later found closely related discussion in the ecology literature expressed using different names for the
+same $2\times 2$ contingency-table quantities (phi coefficient, double zeros, and the Ochiai similarity).
+AI-assisted semantic search was instrumental in suggesting this alternate terminology; all cited sources were
+then checked manually, and the equivalence was verified by translating notation and definitions.
+
+
 
 \section{Conclusion}
 
@@ -521,3 +577,4 @@ Thanks to Lee Newberg for the cleaner formulation of \cref{eq:lee_step1,eq:lee_s
 \bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
 
 \end{document}
+
