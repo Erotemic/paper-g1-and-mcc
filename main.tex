@@ -2,8 +2,8 @@
 
 \usepackage{arxiv}
 
-%\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+%\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
@@ -17,12 +17,22 @@
 
 %% extra
 \usepackage{listings}
+\usepackage{listingsutf8} % <-- key
+
 \usepackage{amsmath} 
 \usepackage{xcolor}
+\usepackage{color}
 
 \usepackage{cleveref}       % smart cross-referencing
 
+\usepackage{amsmath,amssymb}
+\usepackage{alltt}
 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\nhds}{\mathcal{N}}
+
+
+\definecolor{keywordcolor}{rgb}{0.0,0.0,0.6}
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
@@ -31,7 +41,7 @@
 \lstdefinestyle{mystyle}{
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
+    keywordstyle=\color{keywordcolor},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
@@ -44,7 +54,8 @@
     showspaces=false,                
     showstringspaces=false,
     showtabs=false,                  
-    tabsize=2
+    tabsize=2,
+    morekeywords={assert},
 }
 
 \definecolor{light-gray}{gray}{0.95}
@@ -99,7 +110,7 @@
 pdftitle={The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.},
 pdfsubject={q-cs.CV},
 pdfauthor={Jon Crall},
-pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthew's Correlation Coefficient, F1},
+pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthews Correlation Coefficient, F1},
 }
 
 \begin{document}
@@ -123,7 +134,7 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
     Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
     This paper provides insight into the relationship between the MCC and FM score by proving that the
       FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
-    \emph{Update 2026-01-28:} This proof was previously published in ecology literature in terms of the phi
+    \emph{Update 2026--01--28:} This proof was previously published in ecology literature in terms of the phi
       coefficient and the Ochiai similarity, but we discuss it in the context of binary classifiers.
     We formalize the proof in Lean using AI-assistance and also comment on the use of AI in locating prior
       work.
@@ -131,7 +142,7 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
 
 
 % keywords can be removed
-\keywords{Confusion Matrix \and Binary Classification \and Fowlkes--Mallows Index \and Matthew's Correlation Coefficient \and F1}
+\keywords{Confusion Matrix \and Binary Classification \and Fowlkes--Mallows Index \and Matthews Correlation Coefficient \and F1}
 
 
 \section{Introduction}
@@ -193,20 +204,20 @@ In~\cite{powers_evaluation_2011}, Powers notes that the F1 score (and consequent
 Powers, introduces modifications of precision and recall he refers to as informedness and markedness.
 Additionally he advocates for the use of the MCC over the F1 measure.
 
-The Matthews Correlation Coefficient (MCC) \cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
+The Matthews Correlation Coefficient (MCC)~\cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
 
 \begin{equation}
-    \MCC{} = \frac{
+    \MCC{} = \frac{%
         \TP{} \cdot \TN{} - \FP{} \cdot \FN{}
     }
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})
     }}
 \end{equation}
 
 While the MCC is a desirable measure due to its balanced inclusion of all terms in a confusion matrix, it
   requires that the number of true negatives is measurable.
-In the case of object detection problems \cite{zou2023object}, this is often intractable as the number of
+In the case of object detection problems~\cite{zou2023object}, this is often intractable as the number of
   the number of predicted boxes and missed true boxes is dwarfed by the total number of boxes that the system
   correctly did not predict.
 One can see this by considering the set of all $N\times M$ boxes centered at each pixel, most of which will
@@ -229,7 +240,8 @@ The main contribution of this paper is to highlight a relationship between the M
 the MCC reduces to FM as the number of true negatives approaches infinity.
 
 % TODO: REVISE WORDING
-\paragraph{Related work and terminology.}
+\section{Related Work}
+%\paragraph{Related work and terminology.}
 In vegetation science and community ecology, $2\times 2$ contingency tables are commonly used to measure
 association/similarity between two binary variables (e.g. the presence/absence of a species and membership
 in a site group).
@@ -266,19 +278,21 @@ Specifically, the contributions are:
 
 
 
-\section{The Relationship Between MCC and FM}
+\section{The Relationship Between MCC and FM}%
 \label{sec:headings}
 
 \paragraph{Taking the limit of the MCC}
 
-Consider the limit of the MCC as the number of true negatives approaches infinity.
+Let $\TP{}$, $\FP{}$, $\TN{}$, and $\FN{}$ be non-negative real numbers with
+$\TP{} + \FP{} > 0$ and $\TP{} + \FN{} > 0$.  Consider the limit of the MCC as the
+number of true negatives approaches infinity.
 
 \begin{equation}
     \lim_{\TN{} \to \infty} \MCC{} = \lim_{\TN{} \to \infty}
-    \frac{
+    \frac{%
         \TP{} \cdot \TN{} - \FP{} \cdot \FN{}
     }
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})
     }}
 \end{equation}
@@ -288,10 +302,10 @@ We can take this limit by applying some algebra to the body of the limit. We mul
 
 \begin{equation}\label{eq:lee_step1}
     = \lim_{\TN{} \to \infty}
-    \frac{ 
+    \frac{% 
         \frac{1}{\TN{}} (\TP{} \cdot \TN{} - \FP{} \cdot \FN{}) 
     }
-    {\frac{1}{\TN{}} \sqrt{
+    {\frac{1}{\TN{}} \sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})
     }} 
 \end{equation}
@@ -300,10 +314,10 @@ We distribute the $\frac{1}{\TN{}}$ term in the numerator and denominator:
 
 \begin{equation}\label{eq:lee_step2}
     = \lim_{\TN{} \to \infty}
-    \frac{ 
+    \frac{% 
         (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
     }
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (\frac{\TN{} + \FP{}}{\TN{}}) (\frac{\TN{} + \FN{}}{\TN{}})
     }}
 \end{equation}
@@ -312,10 +326,10 @@ The $\frac{\TN{}}{\TN{}}$ terms in the denominator cancel:
 
 \begin{equation}\label{eq:lee_step3}
     = \lim_{\TN{} \to \infty}
-    \frac{ 
+    \frac{% 
         (\TP{} - \FP{} \cdot \frac{\FN{}}{\TN{}}) 
     }
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (1 + \frac{\FP{}}{\TN{}}) (1 + \frac{\FN{}}{\TN{}})
     }}
 \end{equation}
@@ -327,10 +341,10 @@ $0$. Thus, the entire equation simplifies to:
 
 \begin{equation}\label{eq:postlimit}
     = 
-    \frac{ 
+    \frac{% 
         (\TP{} - \FP{} \cdot 0) 
     }
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) (1 + 0) (1 + 0)
     }}
 \end{equation}
@@ -406,7 +420,7 @@ the MCC as true negatives approach infinity is:
 \begin{equation}
     = 
     \frac{\TP{}}
-    {\sqrt{
+    {\sqrt{%
         (\TP{} + \FP{}) (\TP{} + \FN{}) 
     }}
 \end{equation}
@@ -425,12 +439,11 @@ Now rearranging the equation for FM, we find it is equivalent to the limit of th
 
 \paragraph{Verifying the proof}
 
-The correctness of these claims can be verified using SymPy \cite{sympy17}. We
+The correctness of these claims can be verified using SymPy~\cite{sympy17}. We
 define a symbolic expression for the definition of the MCC and FM score. We
 then use SymPy to determine the limit of the MCC as $\TN{} \to \infty$. 
 Finally we subtract expressions that we claim are equal, which will result in
 zero only if they are equal.
-
 
 \begin{lstlisting}[language=Python]
 
@@ -449,7 +462,7 @@ mcc = numer / denom
 FM = sqrt((tp / (tp + fn)) * (tp / (tp + fp)))
 
 # Compute the limit of the MCC definition
-mcc_lim = limit(mcc, tn, float('inf'))
+mcc_lim = limit(mcc, tn, float("inf"))
 
 # We claim the limit of the MCC and the FM are equivalant to:
 mcc_lim_claim = tp / sqrt((tp + fn) * ((tp + fp)))
@@ -464,64 +477,287 @@ assert simplify(mcc_lim - mcc_lim_claim) == 0
 The above program does not raise an AssertionError, thus we have proven
 $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
-\section{Formal Verification with Lean}
+\section{Formal Verification with Lean}%
 \label{sec:lean}
 
 This section is an addendum. The original body of this paper was written on
-2023-07-11; the Lean formalization and this section were added on 2025-11-29.
+2023--07--11; the Lean formalization and this section were added on 2025--11--29.
 
 We formalized the main result in Lean~4~\cite{moura2021lean}, an interactive
 theorem prover with a small trusted kernel.  A Lean proof provides a
 machine-checked guarantee that each algebraic manipulation and limit argument
 used in the informal derivation is valid under explicit assumptions.
 
-The main theorem is expressed as a limit along \code{atTop} on the true-negative
-coordinate:
+The proof is small enough that we can present it here, heavily commented to make the structure clear for
+  readers who are unfamiliar with Lean.
+It is possible to dramatically simplify the proof, but this variant is better aligned with the arguments in
+  \Cref{sec:headings}.
+
+%The main theorem is expressed as a limit along \code{atTop} on the true-negative
+%coordinate:
 
 \noindent
-\texttt{/-- Main theorem: as TN }$\to \infty$\texttt{, MCC converges to FM. -/}\\
-\texttt{theorem MCC\_atTop\_eq\_FM}\\
-\texttt{\{TP FP FN : }$\mathbb{R}$\texttt{\}}\\
-\texttt{(hTP\_pos   : 0 < TP)}\\
-\texttt{(h\_den\_pos : 0 < (TP + FP) * (TP + FN)) :}\\
-\texttt{Tendsto (fun TN => MCC TP TN FP FN) atTop (}$\mathcal{N}$\texttt{ (FM TP FP FN)) := by}\\
-\texttt{-- See the full 654-line proof in:}\\
-\texttt{-- MCC\_atTop\_eq\_FM/Main.lean}
 
-% TODO: reference the smaller versions of the proof.
+\definecolor{commentcolor}{rgb}{0.0,0.5,0.0}
+\definecolor{stringcolor}{rgb}{0.58,0.0,0.82}
+\definecolor{numbercolor}{rgb}{0.5,0.5,0.5}
+\definecolor{tacticcolor}{rgb}{0.58,0.0,0.82}
 
-Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
-the formulas in this paper. The full proof is 654 lines. It is available in
-these forms:
+%\def\lstlanguagefiles{lstlean.tex}
 
-\begin{itemize}
-\item GitHub permalink: \\
-\href{https://github.com/Erotemic/paper-g1-and-mcc/blob/1d8637885b53bd142c306db991c8792c4aefb3e2/mcc-proof/MCC_atTop_eq_FM/Main.lean}{%
-    \texttt{https://github.com/Erotemic/paper-g1-and-mcc/blob/}\\%
-    \texttt{1d8637885b53bd142c306db991c8792c4aefb3e2/}%
-\texttt{mcc-proof/MCC\_atTop\_eq\_FM/Main.lean}}
+\lstdefinelanguage{lean}{%
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  %morestring=[b]",
+  % “structure” keywords
+  morekeywords=[1]{import,open,namespace,section,end,noncomputable,variable,variables,
+    theorem,lemma,def,abbrev,example,instance,structure,class,inductive,notation,
+    by,where,let,have,show,fun,match,with,if,then,else,do,return,in,forall},
+  % tactics / common commands (tune this list)
+  morekeywords=[2]{simp,simpa,rw,erw,dsimp,unfold,ring,ring_nf,nlinarith,linarith,
+    positivity,norm_num,field_simp,omega,tauto,exact,refine,apply,assumption,
+    intro,intros,ext,funext,cases,rcases,obtain,constructor,left,right,
+    classical,by_contra,contrapose,finish,taut,done,convert,using,suffices,calc},
+}
 
-%** TODO: Add sha256 checksum **
+\newcommand{\surdSym}{\ensuremath{\raisebox{0.3ex}{\scalebox{0.8}{$\surd$}}}}
 
-\item IPFS snapshot (CID): \\
-\href{https://ipfs.io/ipfs/bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}{%
-\texttt{https://ipfs.io/ipfs/}%
-\texttt{bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}}
-\end{itemize}
+\lstdefinestyle{leanpretty}{%
+    language=lean,
+    columns=fullflexible,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{keywordcolor},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    literate=
+      {`}{\textasciigrave}1
+      {\\Real}{$\mathbb{R}$}5
+      {\\le}{$\le$}3
+      {\\ge}{$\ge$}3
+      {\\ne}{$\ne$}3
+      {\\to}{$\to$}3
+      {\\in}{$\in$}3
+      {\\nhdsSym}{$\mathcal{N}$}8
+      {\\Infinity}{$\infty$}9
+      {\\root}{\surdSym}5
+      {\\eqF}{$=\raisebox{-0.3ex}{^{\mathrm{f}}}$}4
+}
 
-%# Aristotle version
-%bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
+% python ~/code/paper-g1-and-mcc/map_lean_unicode.py --emit-literate
+% Use it:
+\lstset{style=leanpretty}
 
-%# GPT 5.1 version
-%bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky
+%\input{leanproof_v2.tex}
+
+First we import basic mathlib functionality and define the terms used in the proof.
+
+\begin{lstlisting}[language=lean]
+import Mathlib.Tactic
+open Filter Topology
+
+noncomputable section
+
+/-- Precision (positive predictive value) -/
+def PPV (TP FP : \Real) : \Real := TP / (TP + FP)
+
+/-- Recall (true positive rate) -/
+def TPR (TP FN : \Real) : \Real := TP / (TP + FN)
+
+/-- Fowlkes–Mallows index -/
+def FM (TP FP FN : \Real) : \Real := \root (PPV TP FP * TPR TP FN)
+
+/-- Matthews correlation coefficient -/
+def MCC (TP TN FP FN : \Real) : \Real :=
+  (TP * TN - FP * FN) / \root ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
+\end{lstlisting}
+
+Next, we define several lemmas that prove generic facts that will be useful in
+the main theorem.
+
+\begin{lstlisting}[language=lean]
+/-- The basic fact `c / x \to 0` as `x \to +\Infinity`.
+Limits in Lean are expressed with filters.
+`Tendsto f atTop (\nhdsSym L)` is the Lean form of `lim_{x \to +\Infinity} f x = L`. -/
+lemma tendsto_const_div_atTop_nhds_0 (c : \Real) :
+    Tendsto (fun x : \Real => c / x) atTop (\nhdsSym 0) :=
+  tendsto_const_nhds.div_atTop Filter.tendsto_id
+
+/-- If `c/x \to 0` then `1 + c/x \to 1` (limit rule for addition). -/
+lemma tendsto_one_add_const_div_atTop (c : \Real) :
+    Tendsto (fun x : \Real => (1 : \Real) + c / x) atTop (\nhdsSym 1) := by
+  simpa using (tendsto_const_nhds.add (tendsto_const_div_atTop_nhds_0 c))
+
+/-- If `c/x \to 0` then `a - c/x \to a` (limit rule for subtraction). -/
+lemma tendsto_const_sub_const_div_atTop (a c : \Real) :
+    Tendsto (fun x : \Real => a - c / x) atTop (\nhdsSym a) := by
+  simpa using (tendsto_const_nhds.sub (tendsto_const_div_atTop_nhds_0 c))
+
+/- A common pattern we will use: `A * (1 + c/x) * (1 + d/x) \to A`.
+This is just the limit rule for multiplication, plus the fact that constants tend to
+themselves, and `(1 + c/x) \to 1`.-/
+lemma tendsto_const_mul_one_add_mul_one_add_div_atTop (A c d : \Real) :
+    Tendsto (fun x : \Real => A * (1 + c / x) * (1 + d / x)) atTop (\nhdsSym A) := by
+  have := (tendsto_one_add_const_div_atTop c).mul (tendsto_one_add_const_div_atTop d)
+  simpa [mul_assoc] using (tendsto_const_nhds.mul this)
+
+/-- If `a > 0` then `sqrt(a) \ne 0` (since `sqrt(a) > 0`).
+In Lean, a theorem or lemma is stated in the context of named hypotheses
+(assumptions). Read this as: given the condition `h_agt0` the following claim is true. -/
+lemma sqrt_of_pos_ne_zero {a : \Real} (h_agt0 : 0 < a) : \root a \ne 0 :=
+  ne_of_gt (Real.sqrt_pos.mpr h_agt0)
+
+/- A generic algebraic step used in the MCC denominator manipulation.
+`sqrt(x) / t = sqrt(x / t^2)`  (assuming `0 \le x` and `0 \le t`).
+`aesop` (Automated Extensible Search for Obvious Proofs) is an automation tactic.
+It performs a small proof search using simp rules and standard lemmas. -/
+lemma sqrt_div_eq_sqrt_div_sq {x t : \Real} (h_xge0 : 0 \le x) (h_tge0 : 0 \le t) :
+    \root x / t = \root (x / (t ^ 2)) := by aesop
+\end{lstlisting}
+
+We are now prepared to state and prove the main theorem. Under conditions where
+confusion matrix entries are non-zero, and denominators are non-zero, the
+Matthews Correlation Coefficient converges towards the Fowlkes-Mallows index as
+true negatives become arbitrarily large:
+
+\begin{lstlisting}[language=lean]
+theorem tendsto_MCC_atTop_eq_FM
+    {TP FP FN : \Real}
+    (hTPFPpos : 0 < TP + FP)
+    (hTPFNpos : 0 < TP + FN)
+    (hTP_geq0 : 0 \le TP)
+    (hFP_geq0 : 0 \le FP)
+    (hFN_geq0 : 0 \le FN) :
+    Tendsto (fun TN : \Real => MCC TP TN FP FN) atTop (\nhdsSym (FM TP FP FN)) := by
+  -- `A` is the constant factor that does not depend on TN.
+  let A : \Real := (TP + FP) * (TP + FN)
+  -- This is the “post step 3” expression: the same one that appears in the algebraic limit.
+  let post_step3 : \Real \to \Real := fun TN =>
+    (TP - FP * FN / TN) / \root (A * (1 + FP / TN) * (1 + FN / TN))
+  ----------------------------------------------------------------------
+  -- Step 1/2/3 algebraic rewrite: for TN > 0, MCC(TN) = post_step3(TN).
+  ----------------------------------------------------------------------
+  -- `f \eqF[atTop] g` means: `f TN` eventually equals `g TN` for all sufficiently large `TN`.
+  have h_steps_123 :
+      (fun TN : \Real => MCC TP TN FP FN) \eqF[atTop] post_step3 := by
+    -- `filter_upwards` is a convenient way to work with “eventually” statements.
+    -- Here it gives us an arbitrary `TN` with the assumption `0 < TN`.
+    filter_upwards [Filter.eventually_gt_atTop (0 : \Real)] with TN hTN_gt0
+
+    -- After unfolding, the goal is a concrete identity between real expressions.
+    simp [MCC, post_step3, A]
+    -- Step 2: distribute the factor `1/TN` into the numerator.
+    have h_num : (TP * TN - FP * FN) / TN = TP - FP * FN / TN := by
+      field_simp [hTN_gt0.ne'] 
+    -- Step 3: rewrite `(TN + FP)/TN` as `1 + FP/TN`, similarly for `FN`.
+    have h_inside :
+        ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) / (TN ^ 2) =
+          (TP + FP) * (TP + FN) * (1 + FP / TN) * (1 + FN / TN) := by field_simp [hTN_gt0.ne']
+    -- Name the large product under the MCC square root.
+    let mcc_inside_denom : \Real := (TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)
+    -- Side condition needed to move division under `sqrt`.
+    have hDenomGe0 : 0 \le mcc_inside_denom := by simp [mcc_inside_denom]; positivity
+    -- Denominator rewrite: push `/TN` inside `sqrt`, then substitute the Step-3 identity.
+    have h_sqrt :
+        \root ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) / TN =
+          \root (A * (1 + FP / TN) * (1 + FN / TN)) := by
+      simpa [mcc_inside_denom, A] using
+        (sqrt_div_eq_sqrt_div_sq (x := mcc_inside_denom) (t := TN) hDenomGe0 hTN_gt0.le).trans
+          (by aesop)
+    -- Final algebraic combination: divide numerator and denominator by TN.
+    calc
+      (TP * TN - FP * FN) / \root ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) =
+        ((TP * TN - FP * FN) / TN) /
+          (\root ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) / TN) := by field_simp [hTN_gt0.ne']
+      _ = (TP - FP * FN / TN) / \root (A * (1 + FP / TN) * (1 + FN / TN)) := by aesop
+  ----------------------------------------------------------------------
+  -- Limit of post_step3: as TN \to +\Infinity, the small fractions FP/TN and FN/TN go to 0.
+  ----------------------------------------------------------------------
+  -- Numerator limit: `TP - (FP*FN)/TN \to TP`.
+  have h_num_lim :
+      Tendsto (fun TN : \Real => TP - FP * FN / TN) atTop (\nhdsSym TP) :=
+    tendsto_const_sub_const_div_atTop TP (FP * FN)
+  -- Denominator limit: `sqrt(A * (1 + FP/TN) * (1 + FN/TN)) \to sqrt(A)`.
+  have h_den_lim :
+      Tendsto (fun TN : \Real => \root (A * (1 + FP / TN) * (1 + FN / TN))) atTop (\nhdsSym (\root A)) :=
+      by simpa using
+       (Filter.Tendsto.sqrt (tendsto_const_mul_one_add_mul_one_add_div_atTop A FP FN))
+  -- The quotient limit rule needs the limit denominator to be nonzero.
+  have h_den_ne : \root A \ne 0 := by
+     have hApos : 0 < A := by simpa [A] using (mul_pos hTPFPpos hTPFNpos)
+     exact sqrt_of_pos_ne_zero hApos
+  -- Quotient limit rule: if num \to Num and den \to Den with Den \ne 0, then num/den \to Num/Den.
+  have h_post_lim : Tendsto post_step3 atTop (\nhdsSym (TP / \root A)) := by
+    exact Filter.Tendsto.div h_num_lim h_den_lim h_den_ne
+  -- Transfer the limit from `post_step3` back to `MCC` using eventual equality.
+  have h_mcc_lim :
+      Tendsto (fun TN : \Real => MCC TP TN FP FN) atTop (\nhdsSym (TP / \root A)) := by
+    exact h_post_lim.congr' (Filter.EventuallyEq.symm h_steps_123)
+  ----------------------------------------------------------------------
+  -- Rewrite FM into the same closed form `TP / sqrt(A)`.
+  ----------------------------------------------------------------------
+  have h_FM : FM TP FP FN = TP / \root A := by
+    have: TP / (TP + FP) * (TP / (TP + FN)) = (TP ^ 2) / ((TP + FP) * (TP + FN)) := by
+      field_simp [hTPFPpos.ne', hTPFNpos.ne']
+    simp_all [FM, PPV, TPR, A]
+  /- `h_mcc_lim` shows the limit is `TP / sqrt A`. `h_FM` shows `FM` can be rewritten as the same
+  value. Substituting this rewrite into the target of `h_mcc_lim` completes the proof. -/
+  simpa [h_FM] using h_mcc_lim
+\end{lstlisting}
 
 
-The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
-file content, providing redundancy against link rot and build-in checksum
-verification.
+The above Lean code compiles with version
+\texttt{leanprover/lean4:v4.28.0-rc1}, thus --- up to soundness holes --- we
+have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
-\section{AI Usage}
+%Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
+%the formulas in this paper. The full proof is 654 lines. It is available in
+%these forms:
+
+%https://github.com/Erotemic/paper-g1-and-mcc/blob/main/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean
+%\begin{itemize}
+%\item GitHub permalink: \\
+%\href{https://github.com/Erotemic/paper-g1-and-mcc/blob/89dc05e80432f727cc41f07ecfeda5c87e69945d/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean}{%
+%    \texttt{https://github.com/Erotemic/paper-g1-and-mcc/blob/}\\%
+%    \texttt{89dc05e80432f727cc41f07ecfeda5c87e69945d/}%
+%\texttt{mcc-proof/MCC\_atTop\_eq\_FM/WuAristotle.lean}}
+
+%%** TODO: Add sha256 checksum **
+
+%\item IPFS snapshot (CID): \\
+%\href{https://ipfs.io/ipfs/bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}{%
+%\texttt{https://ipfs.io/ipfs/}%
+%\texttt{bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}}
+%\end{itemize}
+
+%%# Aristotle version
+%%bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
+
+%%# GPT 5.1 version
+%%bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky
+
+
+%The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
+%file content, providing redundancy against link rot and build-in checksum
+%verification.
+
+\section{AI Usage}%
 \label{sec:ai_usage}
+
+AI has begun to transform math and science research. 
+There are several notable experiences the author would like to mention.
 
 \paragraph{Construction with large language models}
 The Lean proof was assembled interactively with assistance from the GPT-5.1
@@ -531,8 +767,10 @@ Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_car
 GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from lean and was
   prone to syntax errors.
 Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
-  leanprover.zulipchat refined this to 66 lines (including comments).
-
+  leanprover.zulipchat~\cite{crall2025zulip561031593} refined this to 66 lines (including comments).
+Building on that, GPT-5.2\cite{openai_gpt52_system_card} with extended thinking and manual feedback was able
+  to produce the proof that matches the structure or the original natural language argument, and is the
+  version presented here.
 % Note aristotle proof
 
 \paragraph{Note on discovery and terminology drift.}
@@ -544,17 +782,6 @@ we later found closely related discussion in the ecology literature expressed us
 for the same $2\times 2$ contingency table quantities (phi coefficient, double zeros, and the Ochiai similarity).
 Modern AI-assisted semantic search was instrumental in suggesting this alternate terminology, after which the
 connection was verified directly by reading the cited sources and translating notation.
-
-\paragraph{Note on discovery and terminology drift.}
-The relationship proved in this paper was initially investigated by the author under the terminology of
-binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
-open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
-Searching within this vocabulary did not reveal an explicit prior statement of the limit.
-We later found closely related discussion in the ecology literature expressed using different names for the
-same $2\times 2$ contingency-table quantities (phi coefficient, double zeros, and the Ochiai similarity).
-AI-assisted semantic search was instrumental in suggesting this alternate terminology; all cited sources were
-then checked manually, and the equivalence was verified by translating notation and definitions.
-
 
 
 \section{Conclusion}

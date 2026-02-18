@@ -87,3 +87,23 @@ theorem tendsto_MCC_atTop_eq_FM
     intro TN hTN; rw [mcc_eq _ _ _ _ (by positivity) (h4 _ (by positivity))]; simp
 
   have h7 := Tendsto.add h5 h3; simp at h7; exact h7
+
+
+Yes — that’s a fair and accurate way to say it.
+
+A slightly tighter version (so it lands well and doesn’t sound like you’re “correcting” them too aggressively):
+
+> In the formalization, the “(g) is bounded” assumption mainly controls the embedding side (the (\psi)’s). Combined with continuity/compactness assumptions on the learner, that can give a uniform bound on the **predictions** (\hat y).
+> But the expectation step in Appendix A still depends on controlling the **true label** (y) (or the loss growth in (y)). If (y) is unbounded and the loss can grow with (y) (e.g. squared loss), bounded (g) alone doesn’t imply the integrable domination needed to pass from convergence in probability to convergence of expectations.
+
+If you want it even shorter:
+
+
+I'm having a hard time removing the additional assumption.
+
+The way I'm understanding it is: the g is bounded assumption from the main text only lets you control the predicted yhat component of the loss, but not the part from the true labels y.
+
+The way GPT phrases it is:
+> Bounded (g) helps bound ŷ (via continuity), but not y; so an additional “niceness”/integrability assumption involving y or the loss is still needed for the appendix expectation step.
+
+Its possible I'm just not understanding this correctly though, but I think this formalization is as close as I'm able to get, but even with them I think the extra assumption is often satisfied in real world cases.
