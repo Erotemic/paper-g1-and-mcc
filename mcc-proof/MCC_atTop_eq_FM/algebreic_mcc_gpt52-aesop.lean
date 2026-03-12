@@ -86,7 +86,7 @@ theorem tendsto_MCC_atTop_eq_FM
     simp [MCC, post_step3, A]
     -- Step 2: distribute the factor `1/TN` into the numerator.
     have h_num : (TP * TN - FP * FN) / TN = TP - FP * FN / TN := by
-      field_simp [hTN_gt0.ne'] -- `field_simp` clears denominators; it needs `TN ≠ 0`.
+      field_simp [hTN_gt0.ne']
     -- Step 3: rewrite `(TN + FP)/TN` as `1 + FP/TN`, similarly for `FN`.
     have h_inside :
         ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) / (TN ^ 2) =

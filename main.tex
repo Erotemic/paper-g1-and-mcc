@@ -24,6 +24,8 @@
 \usepackage{color}
 
 \usepackage{cleveref}       % smart cross-referencing
+\usepackage{tikz}
+
 
 \usepackage{amsmath,amssymb}
 \usepackage{alltt}
@@ -70,11 +72,20 @@
 \definecolor{kwdarkgreen}{HTML}{2E5524}
 \definecolor{kwdarkblue}{HTML}{003765}
 
+% For "e.g." and "i.e." (Standard spacing)
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\ie}{i.e.\@\xspace}
 
 \newcommand{\TP}[1]{\textcolor{kwgreen}{\texttt{\textbf{TP}}}}
 \newcommand{\FP}[1]{\textcolor{kwred}{\texttt{\textbf{FP}}}}
-\newcommand{\TN}[1]{\textcolor{kwblue}{\texttt{\textbf{TN}}}}
 \newcommand{\FN}[1]{\textcolor{kworange}{\texttt{\textbf{FN}}}}
+\newcommand{\TN}[1]{\textcolor{kwblue}{\texttt{\textbf{TN}}}}
+
+
+\newcommand{\mata}[1]{\textcolor{kwgreen}{\texttt{\textbf{a}}}}
+\newcommand{\matb}[1]{\textcolor{kwred}{\texttt{\textbf{b}}}}
+\newcommand{\matc}[1]{\textcolor{kworange}{\texttt{\textbf{c}}}}
+\newcommand{\matd}[1]{\textcolor{kwblue}{\texttt{\textbf{d}}}}
 
 \newcommand{\PPV}[0]{\texttt{\textbf{PPV}}}
 \newcommand{\TPR}[0]{\texttt{\textbf{TPR}}}
@@ -93,7 +104,8 @@
 %    The limit of the MCC as true negatives approach infinity is the geometric mean of precision and recall.
 }
 
-\author{\href{https://orcid.org/0009-0008-8455-7514}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Jon Crall}\thanks{https://github.com/Erotemic/ \texttt{erotemic@gmail.com}} \\
+
+\author{\href{https://orcid.org/0009-0008-8455-7514}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Jon Crall}\thanks{\href{https://github.com/Erotemic}{https://github.com/Erotemic} \hspace{10pt} \texttt{erotemic@gmail.com}} \\
 	Kitware Inc.\\
 	\texttt{jon.crall@kitware.com}
 }
@@ -110,7 +122,12 @@
 pdftitle={The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.},
 pdfsubject={q-cs.CV},
 pdfauthor={Jon Crall},
-pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthews Correlation Coefficient, F1},
+pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthews Correlation Coefficient, F1,Phi-Coefficient,Ochiai Index},
+colorlinks=true,       % False: boxed links; true: colored links
+%linkcolor=blue,        % Color of internal links (sections, etc.)
+%citecolor=green,       % Color of citation links
+%urlcolor=MidnightBlue, % Color of external URLs
+%allcolors=blue         % Alternatively, set all types to one color
 }
 
 \begin{document}
@@ -134,15 +151,15 @@ pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Ma
     Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
     This paper provides insight into the relationship between the MCC and FM score by proving that the
       FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
-    \emph{Update 2026--01--28:} This proof was previously published in ecology literature in terms of the phi
-      coefficient and the Ochiai similarity, but we discuss it in the context of binary classifiers.
-    We formalize the proof in Lean using AI-assistance and also comment on the use of AI in locating prior
-      work.
+    \emph{Update 2026--01--28:} This proof was previously published in ecology literature in terms of the
+      phi-coefficient and the Ochiai index, but we discuss it in the context of binary classifiers.
+    We formalize the proof in Lean using LLM-assistance and also comment on the use of LLMs in locating
+      prior work.
 \end{abstract}
 
 
 % keywords can be removed
-\keywords{Confusion Matrix \and Binary Classification \and Fowlkes--Mallows Index \and Matthews Correlation Coefficient \and F1}
+\keywords{Confusion Matrix \and Binary Classification \and Fowlkes--Mallows Index \and Matthews Correlation Coefficient \and F1 \and Phi-Coefficient \and Ochiai Index}
 
 
 \section{Introduction}
@@ -186,7 +203,7 @@ are correct.
 One of the most popular confusion metrics is the F1 score. 
 It can be defined as the harmonic mean of precision and recall.
 
-\begin{equation}
+\begin{equation}\label{eq:fone}
     \Fone{} = \frac{2 \PPV{} \cdot \TPR{}}{\PPV{} + \TPR{}} = \frac{2 \TP{}}{2 \TP{} + \FP{} + \FN{}}
 \end{equation}
 
@@ -195,7 +212,7 @@ A similar, but less used metric is the Fowlkes-Mallows index~\cite{fowlkes_metho
   originally developed for measuring the similarity between two clusterings of a set of points.
 It can be defined as the geometric mean of precision and recall~\cite{tharwat_classification_2020}.
 
-\begin{equation}
+\begin{equation}\label{eq:fm}
     \Fowlkes{} = \sqrt{\PPV{} \cdot \TPR{}} = \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}}
 \end{equation}
 
@@ -206,7 +223,7 @@ Additionally he advocates for the use of the MCC over the F1 measure.
 
 The Matthews Correlation Coefficient (MCC)~\cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
 
-\begin{equation}
+\begin{equation}\label{eq:mcc}
     \MCC{} = \frac{%
         \TP{} \cdot \TN{} - \FP{} \cdot \FN{}
     }
@@ -232,60 +249,98 @@ Because calculating the number of true negatives is difficult for open-world pro
   positives, false positives, and false negatives, which can be used to compute PPV, TPR, F1, and FM.
 While these measures have proven themselves to be effective, simply ignoring true negatives is somewhat
   unsatisfying.
-We seek to remedy this noting that in these open-world problems the number of true negatives is so large it
-  is effectively infinite and thus we ask the question:
+Exploring the mathematics clarifies this.
+We can notice that in these open-world problems the number of true negatives is so large it is effectively
+  infinite and thus we ask the question:
 what happens to the MCC as the number of true negatives approaches infinity?
 
-The main contribution of this paper is to highlight a relationship between the MCC and the FM score:
-the MCC reduces to FM as the number of true negatives approaches infinity.
+We find that the MCC converges to FM as the number of true negatives approaches infinity.
+When the first version of this paper was written, the authors were unaware of this fact appearing in the
+  literature.
+However, as of 2026, recent AI and LLM systems have begun to transform the way we can access information,
+  and using this tool we found that this result was previously known under a different names:
+the Phi coefficient and Ochiai index~\cite{decaceres_assessing_species_2008}.
 
-% TODO: REVISE WORDING
-\section{Related Work}
-%\paragraph{Related work and terminology.}
-In vegetation science and community ecology, $2\times 2$ contingency tables are commonly used to measure
-association/similarity between two binary variables (e.g. the presence/absence of a species and membership
-in a site group).
-In that literature, the MCC is typically referred to as the \emph{phi coefficient} (or $\phi$ coefficient),
-and the regime where true negatives become dominant is described as adding many \emph{double zeros}
-(joint absences).
-In this context, De C\'aceres et al.~\cite{decaceres_assessing_species_2008} compare the phi coefficient to its
-limit value in large data sets, which they identify with the \emph{Ochiai index}.
-De C\'aceres and Legendre~\cite{caceres_associations_species_2009} explicitly note that adding an infinite amount of
-double zeros drives the correlation-form index to the Ochiai~(1957) similarity coefficient~\cite{ochiai_zoogeographic_studies_1957}.
-Under the standard confusion-matrix identification $(a,b,c,d)=(\TP{},\FP{},\FN{},\TN{})$, the Ochiai
-coefficient is
-\[
-    \mathrm{Ochiai} = \frac{\TP{}}{\sqrt{(\TP{}+\FP{})(\TP{}+\FN{})}}
-    = \sqrt{\PPV{}\cdot\TPR{}},
-\]
-which is exactly the FM index.
-Our aim is to make this relationship explicit in modern machine-learning notation, motivated by open-world
-object detection, and to provide a mechanically checked formalization.
-% /TODO: REVISE WORDING
-
-Specifically, the contributions are:
+The layout of this paper is as follows:
 
 \begin{itemize}
 
-    \item We informally (but rigorously) prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$.
+    \item In \Cref{sec:related_work} we connect the ``double-zero'' discussion
+        from ecology to the object detection setting, where the number of true
+        negatives is effectively unbounded.
 
-    \item We formally prove the statement $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in Lean~4.
+    \item In \Cref{sec:prose_proof} we provide a more explicit proof that: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$.
 
-    \item We connect the ``double-zero'' discussion from ecology to the object detection
-          setting, where the number of true negatives is effectively unbounded.
+    \item In \Cref{sec:lean} formalize this result in Lean~4.
+
+    \item In \Cref{sec:ai_usage} we briefly discuss the role of LLMs in searching related work and producing
+      the machine formalization.
 
 \end{itemize}
 
 
+% TODO: REVISE WORDINe
+\section{Related Work}\label{sec:related_work}
 
-\section{The Relationship Between MCC and FM}%
-\label{sec:headings}
+\newcommand{\MAT}[1]{\ensuremath{
+    \left[ \begin{smallmatrix} #1
+    \end{smallmatrix} \right] }}
+
+In ecology, $2\times 2$ contingency tables are commonly used to measure association/similarity between two
+  binary variables.
+For example, consider measuring how commonly two different species, $A$ and $B$, are observed together
+  across a collection of observations (e.g., sampling sites).
+At each observation, record whether $A$ is present and whether $B$ is present, yielding two binary
+  variables.
+The entries of the resulting $2\times 2$ table $\MAT{\mata{} & \matb{}\\ \matc{} & \matd{}}$ correspond to
+  the number of observations in each joint outcome.
+Specifically, the table entries are the number of observations where:
+$\mata{}$:
+both $A$ and $B$ are present, $\matb{}$:
+$A$ is present but $B$ is absent, $\matc{}$:
+$B$ is present but $A$ is absent, and $\matd{}$:
+neither $A$ nor $B$ is present (a ``double zero'').
+The phi coefficient is the Pearson correlation between these two binary variables.
+
+A binary confusion matrix can similarly be viewed as a $2\times 2$ contingency table, where from a machine
+  learning lens, the variables correspond to the presence / absence of a prediction and the presence / absence
+  of truth.
+Under the identification $(\mata{},\matb{},\matc{},\matd{})=(\TP{},\FP{},\FN{},\TN{})$, the phi coefficient (or $\phi$
+  coefficient) is identical to the Matthews' correlation coefficient (MCC).
+Similarly, the Ochiai index~\cite{ochiai_zoogeographic_studies_1957} is exactly the FM index.
+
+The fact that the limit of the phi coefficient as \matd{} tends towards infinity converges to the Ochiai
+  index was noted in~\cite{janson_measures_ecological_1981}.
+The authors remark that the relationship is easy to see, but omit the proof.
+This observation is also noted in~\cite{decaceres_assessing_species_2008,caceres_associations_species_2009}.
+In an ecological context, it is desirable to derive measures that are insensitive to inclusions of
+  irrelevant ``double zeros'' because:
+``a comparison between meadow flowers should not be influenced by the addition of localities from swamp and
+  city areas''~\cite{janson_measures_ecological_1981}.
+
+In open-world object detection, an analogous issue arises because the set of ``negative'' instances is not a
+  fixed finite collection, but an implicit (and potentially enormous) universe of candidate bounding boxes.
+If one were to score a detector using the MCC, one would need to define and count \TN{} over this universe,
+  which is generally ill-defined and dependent on how the candidate space is discretized.
+Taking the limit $\TN{}\to\infty$ yields a stable, \TN{}-free expression, enabling one to relate properties
+  of the MCC to a quantity computable from \TP{}, \FP{}, and \FN{} alone.
+However, the purpose of this paper is to explore this mathematical relationship, not to prescribe evaluation
+  desiderata for object detection.
+
+While the proof is straightforward, it is not entirely trivial.
+Our contribution is to note the interpretation of this limit in object detection, prove it explicitly in
+  standard notation, and formalize the result in Lean 4.
+
+\section{The Relationship Between MCC and FM}\label{sec:prose_proof}
 
 \paragraph{Taking the limit of the MCC}
 
-Let $\TP{}$, $\FP{}$, $\TN{}$, and $\FN{}$ be non-negative real numbers with
-$\TP{} + \FP{} > 0$ and $\TP{} + \FN{} > 0$.  Consider the limit of the MCC as the
-number of true negatives approaches infinity.
+Let $\TP{}$, $\FP{}$, $\FN{}$, and $\TN{}$ be non-negative real numbers with
+$\TP{} + \FP{} > 0$ and $\TP{} + \FN{} > 0$. 
+The MCC and FM are defined in~\cref{eq:mcc} and~\cref{eq:fm}.
+
+Consider the limit of the MCC as the number of true negatives approaches
+infinity.
 
 \begin{equation}
     \lim_{\TN{} \to \infty} \MCC{} = \lim_{\TN{} \to \infty}
@@ -334,10 +389,10 @@ The $\frac{\TN{}}{\TN{}}$ terms in the denominator cancel:
     }}
 \end{equation}
 
-The terms involving $\TN{}$ are fractions of simple rational polynomials
-(w.r.t. $\TN{}$) and in each case the degree of the denominator is greater
-than that of the numerator, so in the limit each of these terms simplifies to
-$0$. Thus, the entire equation simplifies to:
+The terms involving $\TN{}$ are fractions of simple rational polynomials (w.r.t.
+$\TN{}$) and in each case the degree of the denominator is greater than that of the numerator, so in the
+  limit each of these terms simplifies to $0$.
+The equation then simplifies to:
 
 \begin{equation}\label{eq:postlimit}
     = 
@@ -349,7 +404,7 @@ $0$. Thus, the entire equation simplifies to:
     }}
 \end{equation}
 
-%We can take the limit of this equation using using L'Hôpital's rule --- i.e.
+%We can take the limit of this equation using using L'Hôpital's rule --- \ie{}
 %the limit is equal to the limit of the derivative of the numerator with respect
 %to \TN{} divided by the limit of the denominator with respect to \TN{}.
 
@@ -427,7 +482,8 @@ the MCC as true negatives approach infinity is:
 
 \paragraph{Rearranging the FM}
 
-Now rearranging the equation for FM, we find it is equivalent to the limit of the MCC as the number of true negatives approaches infinity.
+Now, rearranging the equation for FM, we find it is equivalent to the limit of the MCC as the number of true
+  negatives approaches infinity.
 
 \begin{align}
     \Fowlkes{} &= \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}} \\
@@ -436,6 +492,12 @@ Now rearranging the equation for FM, we find it is equivalent to the limit of th
                &= \lim_{\TN{} \to \infty} \MCC{}
 \end{align}
 %\end{equation}
+
+
+Thus we have proven $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}$ \hspace{10pt}\dots{} or have we?
+This particular argument is simple to verify, but does assume knowledge about algebra and limits and assumes
+  justifications are always clear for each step.
+Perhaps a skeptic would be more convinced with a machine checkable claim.
 
 \paragraph{Verifying the proof}
 
@@ -474,24 +536,26 @@ assert simplify(mcc_lim - mcc_lim_claim) == 0
 
 \end{lstlisting}
 
-The above program does not raise an AssertionError, thus we have proven
-$\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
+The above program does not raise an AssertionError, thus we have proven $\lim_{\TN{} \to \infty} \MCC{} =
+  \Fowlkes{}$\hspace{10pt}\dots{} or have we?
+Do we trust that SymPy's symbolic manipulations are always valid?
+It is a large software package, which can have bugs, and a full audit is difficult.
+However there is a proof assistant system that is designed to have a small auditable kernel:
+Lean~4~\cite{moura2021lean}.
+While bugs have been found in the kernel, they are actively searched for, considered high priority, and
+  fixed quickly~\cite{carneiro2025lean4leanverifyingtypecheckerlean}.
 
-\section{Formal Verification with Lean}%
-\label{sec:lean}
+\section{Formal Verification with Lean}\label{sec:lean}
 
-This section is an addendum. The original body of this paper was written on
-2023--07--11; the Lean formalization and this section were added on 2025--11--29.
-
-We formalized the main result in Lean~4~\cite{moura2021lean}, an interactive
-theorem prover with a small trusted kernel.  A Lean proof provides a
-machine-checked guarantee that each algebraic manipulation and limit argument
-used in the informal derivation is valid under explicit assumptions.
+We formalize the main result in Lean~4~\cite{moura2021lean}, an interactive theorem prover with a small
+  trusted kernel.
+A Lean proof provides a machine-checked guarantee that each algebraic manipulation and limit argument used
+  in the informal derivation is valid under explicit assumptions of kernel soundness.
 
 The proof is small enough that we can present it here, heavily commented to make the structure clear for
   readers who are unfamiliar with Lean.
 It is possible to dramatically simplify the proof, but this variant is better aligned with the arguments in
-  \Cref{sec:headings}.
+  \Cref{sec:prose_proof} and more suitable as an introduction to Lean.
 
 %The main theorem is expressed as a limit along \code{atTop} on the true-negative
 %coordinate:
@@ -550,10 +614,10 @@ It is possible to dramatically simplify the proof, but this variant is better al
       {\\ne}{$\ne$}3
       {\\to}{$\to$}3
       {\\in}{$\in$}3
-      {\\nhdsSym}{$\mathcal{N}$}8
-      {\\Infinity}{$\infty$}9
+      {\\nhdsSym}{\ensuremath{\mathcal{N}}}8
+      {\\Infinity}{\ensuremath{\infty}}9
       {\\root}{\surdSym}5
-      {\\eqF}{$=\raisebox{-0.3ex}{^{\mathrm{f}}}$}4
+      {\\eqF}{\ensuremath{=\raisebox{-0.3ex}{^{\mathrm{f}}}}}4
 }
 
 % python ~/code/paper-g1-and-mcc/map_lean_unicode.py --emit-literate
@@ -719,8 +783,8 @@ theorem tendsto_MCC_atTop_eq_FM
 
 
 The above Lean code compiles with version
-\texttt{leanprover/lean4:v4.28.0-rc1}, thus --- up to soundness holes --- we
-have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
+\texttt{leanprover/lean4:v4.28.0-rc1}, thus --- up to soundness holes in the
+Lean kernel --- we have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
 %Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
 %the formulas in this paper. The full proof is 654 lines. It is available in
@@ -753,13 +817,13 @@ have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 %file content, providing redundancy against link rot and build-in checksum
 %verification.
 
-\section{AI Usage}%
-\label{sec:ai_usage}
+\section{LLM Usage}\label{sec:ai_usage}
 
-AI has begun to transform math and science research. 
-There are several notable experiences the author would like to mention.
+LLMs have begun to transform math and science research.
+Here, they enabled the lean 4 formalization and discovered related work in the presence of terminology
+  drift.
 
-\paragraph{Construction with large language models}
+\paragraph{Formalization with LLMs}
 The Lean proof was assembled interactively with assistance from the GPT-5.1
   model~\cite{openai_gpt5_system_card}.
 Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_card} were not successful in
@@ -767,27 +831,27 @@ Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_car
 GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from lean and was
   prone to syntax errors.
 Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
-  leanprover.zulipchat~\cite{crall2025zulip561031593} refined this to 66 lines (including comments).
+  leanprover.zulipchat~\cite{crall2025zulip} refined this to 66 lines (including comments).
 Building on that, GPT-5.2\cite{openai_gpt52_system_card} with extended thinking and manual feedback was able
   to produce the proof that matches the structure or the original natural language argument, and is the
   version presented here.
 % Note aristotle proof
 
-\paragraph{Note on discovery and terminology drift.}
+\paragraph{Literature Search with LLMs}
 The relationship proved in this paper was initially investigated by the author under the terminology of
-binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
-open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
-While searching within this vocabulary did not reveal an explicit prior statement of the limit,
-we later found closely related discussion in the ecology literature expressed using different names
-for the same $2\times 2$ contingency table quantities (phi coefficient, double zeros, and the Ochiai similarity).
-Modern AI-assisted semantic search was instrumental in suggesting this alternate terminology, after which the
-connection was verified directly by reading the cited sources and translating notation.
+  binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
+  open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
+While searching within this vocabulary did not reveal an explicit prior statement of the limit, we later
+  found closely related discussion in the ecology literature expressed using different names for the same
+  $2\times 2$ contingency table quantities (phi coefficient, double zeros, and the Ochiai similarity).
+Modern LLM-assisted semantic search was instrumental in suggesting this alternate terminology, after which
+  the connection was verified directly by reading the cited sources and translating notation.
 
 
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
 
 This paper proves that the limit of the MCC as the number of true negatives
-goes to infinity is equivalent to the Fowlkes--Mallows index (i.e. the
+goes to infinity is equivalent to the Fowlkes--Mallows index (\ie{} the
 geometric mean of precision and recall).
 
 This is a useful insight in open world problems where the number of true negative cases grows faster than
@@ -796,9 +860,10 @@ It validates the use of precision and recall as a way of describing the quality 
   and hints that the FM score may be a preferable alternative to the more standard F1 score.
 
 
-\section{Acknowledgements}
+\section{Acknowledgements}\label{sec:ack}
 
 Thanks to Lee Newberg for the cleaner formulation of \cref{eq:lee_step1,eq:lee_step2,eq:lee_step3} to achieve \cref{eq:postlimit} without needing L'Hôpital's rule.
+
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
