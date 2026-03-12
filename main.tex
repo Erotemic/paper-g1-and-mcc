@@ -30,6 +30,10 @@
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\nhds}{\mathcal{N}}
+\newcommand{\eqF}[1][]{%
+    \ensuremath{=\raisebox{-0.3ex}{^{\mathrm{f}}}%
+    \if\relax\detokenize{#1}\relax\else_{\mathrm{#1}}\fi}%
+}
 
 
 \definecolor{keywordcolor}{rgb}{0.0,0.0,0.6}
@@ -553,7 +557,6 @@ It is possible to dramatically simplify the proof, but this variant is better al
       {\\nhdsSym}{$\mathcal{N}$}8
       {\\Infinity}{$\infty$}9
       {\\root}{\surdSym}5
-      {\\eqF}{$=\raisebox{-0.3ex}{^{\mathrm{f}}}$}4
 }
 
 % python ~/code/paper-g1-and-mcc/map_lean_unicode.py --emit-literate
@@ -576,7 +579,7 @@ def PPV (TP FP : \Real) : \Real := TP / (TP + FP)
 /-- Recall (true positive rate) -/
 def TPR (TP FN : \Real) : \Real := TP / (TP + FN)
 
-/-- Fowlkes–Mallows index -/
+/-- Fowlkes-Mallows index -/
 def FM (TP FP FN : \Real) : \Real := \root (PPV TP FP * TPR TP FN)
 
 /-- Matthews correlation coefficient -/
@@ -643,7 +646,7 @@ theorem tendsto_MCC_atTop_eq_FM
     Tendsto (fun TN : \Real => MCC TP TN FP FN) atTop (\nhdsSym (FM TP FP FN)) := by
   -- `A` is the constant factor that does not depend on TN.
   let A : \Real := (TP + FP) * (TP + FN)
-  -- This is the “post step 3” expression: the same one that appears in the algebraic limit.
+  -- This is the "post step 3" expression: the same one that appears in the algebraic limit.
   let post_step3 : \Real \to \Real := fun TN =>
     (TP - FP * FN / TN) / \root (A * (1 + FP / TN) * (1 + FN / TN))
   ----------------------------------------------------------------------
@@ -652,7 +655,7 @@ theorem tendsto_MCC_atTop_eq_FM
   -- `f \eqF[atTop] g` means: `f TN` eventually equals `g TN` for all sufficiently large `TN`.
   have h_steps_123 :
       (fun TN : \Real => MCC TP TN FP FN) \eqF[atTop] post_step3 := by
-    -- `filter_upwards` is a convenient way to work with “eventually” statements.
+    -- `filter_upwards` is a convenient way to work with "eventually" statements.
     -- Here it gives us an arbitrary `TN` with the assumption `0 < TN`.
     filter_upwards [Filter.eventually_gt_atTop (0 : \Real)] with TN hTN_gt0
 
@@ -804,4 +807,3 @@ Thanks to Lee Newberg for the cleaner formulation of \cref{eq:lee_step1,eq:lee_s
 \bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
 
 \end{document}
-
