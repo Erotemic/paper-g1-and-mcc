@@ -149,10 +149,15 @@ colorlinks=true,       % False: boxed links; true: colored links
 
     However, in object detection problems, the number of true negatives is effectively unbounded.
     Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
+    % Remove provides insight, change to something explicitly states the relationship
     This paper provides insight into the relationship between the MCC and FM score by proving that the
       FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
-    \emph{Update 2026--01--28:} This proof was previously published in ecology literature in terms of the
-      phi-coefficient and the Ochiai index, but we discuss it in the context of binary classifiers.
+    % TODO: might not want to phrase it as an update it looks weird. Also, the
+    % previously published work just noted the result, but did not include the
+    % proof. 
+    %\emph{Update 2026--01--28:} 
+    This result was previously noted in ecology literature in terms of the phi-coefficient and the Ochiai
+      index, but we discuss it in the context of binary classifiers.
     We formalize the proof in Lean using LLM-assistance and also comment on the use of LLMs in locating
       prior work.
 \end{abstract}
@@ -221,7 +226,10 @@ In~\cite{powers_evaluation_2011}, Powers notes that the F1 score (and consequent
 Powers, introduces modifications of precision and recall he refers to as informedness and markedness.
 Additionally he advocates for the use of the MCC over the F1 measure.
 
-The Matthews Correlation Coefficient (MCC)~\cite{matthews_comparison_1975} accounts for all four terms in the confusion matrix and is defined as:
+% https://en.wikipedia.org/wiki/Phi_coefficient
+The Matthews Correlation Coefficient (MCC)~\cite{matthews_comparison_1975} is
+the Pearson correlation between the truth and predictions. It accounts for all
+four terms in the confusion matrix and is defined as:
 
 \begin{equation}\label{eq:mcc}
     \MCC{} = \frac{%
@@ -242,7 +250,6 @@ One can see this by considering the set of all $N\times M$ boxes centered at eac
 If the width and height of the boxes are allowed to extend outside the image, then the number of predictable
   boxes actually is unbounded (and even if they must be contained in the image, there will still be a very
   large number of them in real world cases).
-
 
 Because calculating the number of true negatives is difficult for open-world problems like object detection,
   it is conceptually simpler to ignore true negatives and simply focus on the much smaller set of true
@@ -279,7 +286,6 @@ The layout of this paper is as follows:
 \end{itemize}
 
 
-% TODO: REVISE WORDINe
 \section{Related Work}\label{sec:related_work}
 
 \newcommand{\MAT}[1]{\ensuremath{
@@ -508,12 +514,10 @@ Finally we subtract expressions that we claim are equal, which will result in
 zero only if they are equal.
 
 \begin{lstlisting}[language=Python]
-
 from sympy import sqrt, symbols, simplify
 from sympy.series import limit
 
-tp, tn, fp, fn = symbols("tp tn fp fn",
-                         integer=True, negative=False)
+tp, tn, fp, fn = symbols("tp tn fp fn", integer=True, negative=False)
 
 # The definition of the MCC
 numer = (tp * tn - fp * fn)
@@ -574,7 +578,7 @@ It is possible to dramatically simplify the proof, but this variant is better al
   morecomment=[l]{--},
   morecomment=[s]{/-}{-/},
   %morestring=[b]",
-  % “structure” keywords
+  % "structure" keywords
   morekeywords=[1]{import,open,namespace,section,end,noncomputable,variable,variables,
     theorem,lemma,def,abbrev,example,instance,structure,class,inductive,notation,
     by,where,let,have,show,fun,match,with,if,then,else,do,return,in,forall},
@@ -617,8 +621,11 @@ It is possible to dramatically simplify the proof, but this variant is better al
       {\\nhdsSym}{\ensuremath{\mathcal{N}}}8
       {\\Infinity}{\ensuremath{\infty}}9
       {\\root}{\surdSym}5
-      {\\eqF}{\ensuremath{=\raisebox{-0.3ex}{^{\mathrm{f}}}}}4
+      {\\eqF}{=\raisebox{-0.3ex}{^{\mathrm{f}}}}4
 }
+      %{\\eqF}{foo}4
+      %{\\eqF}{\ensuremath{=^{\mathrm{f}}}}4
+      %{\\eqF}{\ensuremath{=\raisebox{-0.3ex}{^{\mathrm{f}}}}}4
 
 % python ~/code/paper-g1-and-mcc/map_lean_unicode.py --emit-literate
 % Use it:
@@ -640,7 +647,7 @@ def PPV (TP FP : \Real) : \Real := TP / (TP + FP)
 /-- Recall (true positive rate) -/
 def TPR (TP FN : \Real) : \Real := TP / (TP + FN)
 
-/-- Fowlkes–Mallows index -/
+/-- Fowlkes-Mallows index -/
 def FM (TP FP FN : \Real) : \Real := \root (PPV TP FP * TPR TP FN)
 
 /-- Matthews correlation coefficient -/
@@ -707,7 +714,7 @@ theorem tendsto_MCC_atTop_eq_FM
     Tendsto (fun TN : \Real => MCC TP TN FP FN) atTop (\nhdsSym (FM TP FP FN)) := by
   -- `A` is the constant factor that does not depend on TN.
   let A : \Real := (TP + FP) * (TP + FN)
-  -- This is the “post step 3” expression: the same one that appears in the algebraic limit.
+  -- This is the "post step 3" expression: the same one that appears in the algebraic limit.
   let post_step3 : \Real \to \Real := fun TN =>
     (TP - FP * FN / TN) / \root (A * (1 + FP / TN) * (1 + FN / TN))
   ----------------------------------------------------------------------
@@ -716,7 +723,7 @@ theorem tendsto_MCC_atTop_eq_FM
   -- `f \eqF[atTop] g` means: `f TN` eventually equals `g TN` for all sufficiently large `TN`.
   have h_steps_123 :
       (fun TN : \Real => MCC TP TN FP FN) \eqF[atTop] post_step3 := by
-    -- `filter_upwards` is a convenient way to work with “eventually” statements.
+    -- `filter_upwards` is a convenient way to work with "eventually" statements.
     -- Here it gives us an arbitrary `TN` with the assumption `0 < TN`.
     filter_upwards [Filter.eventually_gt_atTop (0 : \Real)] with TN hTN_gt0
 
@@ -819,19 +826,21 @@ Lean kernel --- we have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \s
 
 \section{LLM Usage}\label{sec:ai_usage}
 
-LLMs have begun to transform math and science research.
-Here, they enabled the lean 4 formalization and discovered related work in the presence of terminology
-  drift.
+LLMs have begun to enable new workflows in math and science research.
+Here, they were used to find the Lean 4 formalization of the proof and search for related work.
 
 \paragraph{Formalization with LLMs}
-The Lean proof was assembled interactively with assistance from the GPT-5.1
-  model~\cite{openai_gpt5_system_card}.
+
+
+
+The Lean proof shown in this paper was written using GPT 5.2. 
+The first version was written using GPT-5.1~\cite{openai_gpt5_system_card}.
+GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from Lean and was
+  prone to syntax errors.
 Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_card} were not successful in
   producing working Lean proof.
-GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from lean and was
-  prone to syntax errors.
 Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
-  leanprover.zulipchat~\cite{crall2025zulip} refined this to 66 lines (including comments).
+  leanprover.zulipchat~\cite{crall2025zulip561031593} refined this to 66 lines (including comments).
 Building on that, GPT-5.2\cite{openai_gpt52_system_card} with extended thinking and manual feedback was able
   to produce the proof that matches the structure or the original natural language argument, and is the
   version presented here.
@@ -850,6 +859,7 @@ Modern LLM-assisted semantic search was instrumental in suggesting this alternat
 
 \section{Conclusion}\label{sec:conclusion}
 
+\renewcommand{\ie}{i.e.} % not sure why I needed to renew this command 
 This paper proves that the limit of the MCC as the number of true negatives
 goes to infinity is equivalent to the Fowlkes--Mallows index (\ie{} the
 geometric mean of precision and recall).
