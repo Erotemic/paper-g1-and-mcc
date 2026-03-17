@@ -157,7 +157,7 @@ colorlinks=true,       % False: boxed links; true: colored links
     This result was previously noted in the ecology literature in terms of the phi-coefficient and the
       Ochiai index, but we discuss it in the context of binary classifiers.
     Furthermore, we provide a full proof of the result, including a Lean formalization.
-    We also briefly comment the emerging role of LLMs in proof assistance and in locating prior work.
+    We also briefly comment on the emerging role of LLMs in proof assistance and in locating prior work.
 \end{abstract}
 
 
@@ -185,7 +185,7 @@ predicts with respect to the real labels. A confusion matrix is written as:
 
 This matrix provides a holistic view of classifier quality, however, it is
 often desirable to summarize performance using fewer numbers. Two popular
-metrics defined on a classification matrix are precision and recall.
+metrics defined on a confusion matrix are precision and recall.
 
 Precision --- also known as the positive-predictive-value (PPV) --- is the
 fraction of positive predictions that are correct.
@@ -738,9 +738,9 @@ It required significant manual feedback, was prone to syntax errors, and the res
   it worked.
 Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
   leanprover.zulipchat~\cite{crall2025zulip561031593} refined this to 66 lines (including comments).
-Building on that, GPT-5.2\cite{openai_gpt52_system_card} with extended thinking and manual feedback was able
-  to produce the proof that better matches the structure of the original natural language argument, and is the
-  version presented here.
+Building on that, GPT-5.2~\cite{openai_gpt52_system_card} with extended thinking and manual feedback was
+  able to produce the proof that better matches the structure of the original natural language argument, and
+  is the version presented here.
 
 \paragraph{Literature Search with LLMs}
 
