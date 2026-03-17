@@ -535,11 +535,11 @@ It is possible to dramatically simplify the proof, but this variant is better al
       {\\nhdsSym}{\ensuremath{\mathcal{N}}}8
       {\\Infinity}{\ensuremath{\infty}}9
       {\\root}{\surdSym}5
-      {\\eqF}{=\raisebox{-0.3ex}{^{\mathrm{f}}}}4
+      {\\eqF}{\ensuremath{=\raisebox{-0.3ex}{$^{\mathrm{f}}$}}}4
 }
+      %{\\eqF}{=\raisebox{-0.3ex}{^{\mathrm{f}}}}4
       %{\\eqF}{foo}4
       %{\\eqF}{\ensuremath{=^{\mathrm{f}}}}4
-      %{\\eqF}{\ensuremath{=\raisebox{-0.3ex}{^{\mathrm{f}}}}}4
 
 % python ~/code/paper-g1-and-mcc/map_lean_unicode.py --emit-literate
 % Use it:
@@ -572,7 +572,7 @@ def MCC (TP TN FP FN : \Real) : \Real :=
 Next, we define several lemmas that prove generic facts that will be useful in
 the main theorem.
 
-\begin{lstlisting}[language=lean]
+\begin{lstlisting}[language=lean, firstnumber=last]
 /-- The basic fact `c / x \to 0` as `x \to +\Infinity`.
 Limits in Lean are expressed with filters.
 `Tendsto f atTop (\nhdsSym L)` is the Lean form of `lim_{x \to +\Infinity} f x = L`. -/
@@ -619,7 +619,7 @@ Under conditions where confusion matrix entries are non-negative, and both $\TP{
   \FN{}$ are positive, the Matthews Correlation Coefficient converges towards the Fowlkes-Mallows index as
   true negatives become arbitrarily large:
 
-\begin{lstlisting}[language=lean]
+\begin{lstlisting}[language=lean, firstnumber=last]
 theorem tendsto_MCC_atTop_eq_FM
     {TP FP FN : \Real}
     (hTP_geq0 : 0 \le TP)
@@ -632,7 +632,7 @@ theorem tendsto_MCC_atTop_eq_FM
 
 With the claim now stated, the proof of this theorem is:
 
-\begin{lstlisting}[language=lean]
+\begin{lstlisting}[language=lean, firstnumber=last]
   -- `A` is the constant factor that does not depend on TN.
   let A : \Real := (TP + FP) * (TP + FN)
   -- This is the "post step 3" expression: the same one that appears in the algebraic limit.
