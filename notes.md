@@ -129,3 +129,108 @@ simplify((1 / x > eps) | (1 / x < eps))
 simplify((1 / x >= eps) | (1 / x < eps))
 
 ```    
+
+
+
+%Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
+%the formulas in this paper. The full proof is 654 lines. It is available in
+%these forms:
+
+%https://github.com/Erotemic/paper-g1-and-mcc/blob/main/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean
+%\begin{itemize}
+%\item GitHub permalink: \\
+%\href{https://github.com/Erotemic/paper-g1-and-mcc/blob/89dc05e80432f727cc41f07ecfeda5c87e69945d/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean}{%
+%    \texttt{https://github.com/Erotemic/paper-g1-and-mcc/blob/}\\%
+%    \texttt{89dc05e80432f727cc41f07ecfeda5c87e69945d/}%
+%\texttt{mcc-proof/MCC\_atTop\_eq\_FM/WuAristotle.lean}}
+
+%%** TODO: Add sha256 checksum **
+
+%\item IPFS snapshot (CID): \\
+%\href{https://ipfs.io/ipfs/bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}{%
+%\texttt{https://ipfs.io/ipfs/}%
+%\texttt{bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}}
+%\end{itemize}
+
+%%# Aristotle version
+%%bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
+
+%%# GPT 5.1 version
+%%bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky
+
+
+%The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
+%file content, providing redundancy against link rot and build-in checksum
+%verification.
+
+
+%%% ---------------
+
+% Old L'Hôpital argument
+
+%We can take the limit of this equation using using L'Hôpital's rule --- \ie{}
+%the limit is equal to the limit of the derivative of the numerator with respect
+%to \TN{} divided by the limit of the denominator with respect to \TN{}.
+
+%\begin{equation}
+%    = \lim_{\TN{} \to \infty}
+%    \frac{
+%        \frac{\partial \TP{} \cdot \TN{} - \FP{} \cdot \FN{}}{\partial \TN{}} 
+%    }
+%    {
+%        \frac{\partial \sqrt{(\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})}}{\partial \TN{}}
+%    } 
+%\end{equation}
+
+%The derivative of the numerator simplifies to $\TP{}$ by applying the product
+%rule. The derivative of the denominator can be taken using the chain rule and
+%product rules. Explicitly showing this process is not too difficult, but it is
+%involved. For conciseness we omit the explicit steps and compute the derivative
+%symbolically using a computer. Taking the derivative of the numerator and
+%denominator we get:
+
+%\begin{equation}
+%    = \lim_{\TN{} \to \infty}
+%    \frac{
+%        \TP{} 
+%    }
+%    {
+%        \sqrt{
+%            \frac{
+%                (\FN{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+%            }{
+%                4 (\FP{} + \TN{})
+%            }} + 
+%        \sqrt{
+%            \frac{
+%                (\FP{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
+%            }{
+%                4 (\FN{} + \TN{})
+%            }
+%        }
+%    }
+%\end{equation}
+
+%In the limit the terms with \TN{} cancel, resulting in:
+
+
+%\begin{equation}
+%    =
+%    \frac{
+%        \TP{} 
+%    }
+%    {
+%        \frac{
+%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+%        }{
+%            2 
+%        } + 
+%        \frac{
+%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
+%        }{
+%            2 
+%        }
+%    } 
+%\end{equation}
+
+

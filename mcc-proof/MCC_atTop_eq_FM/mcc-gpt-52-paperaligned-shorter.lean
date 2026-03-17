@@ -3,6 +3,9 @@ open Filter Topology
 
 noncomputable section
 
+theorem one_plus_one :  (1 : ℝ) +  (1 : ℝ) = (2 : ℝ) := by
+    exact one_add_one_eq_two
+
 /-- Precision (positive predictive value). -/
 def PPV (TP FP : ℝ) : ℝ := TP / (TP + FP)
 

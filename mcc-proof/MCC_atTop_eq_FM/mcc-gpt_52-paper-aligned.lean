@@ -202,7 +202,7 @@ Then we:
 2. transfer that limit back to `MCC` using `Tendsto.congr'`.
 -/
 
-theorem tendsto_MCC_atTop_eq_FM
+theorem tendsto_MCC_atTop_eq_FM2
     {TP FP FN : ℝ}
     (hTPFPpos : 0 < TP + FP)
     (hTPFNpos : 0 < TP + FN)
@@ -211,6 +211,95 @@ theorem tendsto_MCC_atTop_eq_FM
     (hFN_ge0 : 0 ≤ FN) :
     Tendsto (fun TN : ℝ => MCC TP TN FP FN) atTop (𝓝 (FM TP FP FN)) := by
 
+  let A : ℝ := (TP + FP) * (TP + FN)
+
+  -- “Work inside the limit”: for all sufficiently large `TN` (here: all `TN > 0`),
+  -- we have `MCC = post_step3`.
+  have h_eq :
+      (fun TN : ℝ => MCC TP TN FP FN) =ᶠ[atTop] (fun TN => post_step3 TP TN FP FN) := by
+    -- `filter_upwards` is a convenient way to prove an “eventually” statement.
+    -- It gives us an arbitrary `TN` together with the hypothesis `0 < TN`.
+    filter_upwards [Filter.eventually_gt_atTop (0 : ℝ)] with TN hTNpos
+    simpa using (mcc_eq_post_step3 TP TN FP FN hTPFPpos hTPFNpos hFP_ge0 hFN_ge0 hTNpos)
+
+  ----------------------------------------------------------------------
+  -- Limit of the post-step-3 expression (“postlimit” simplification)
+  ----------------------------------------------------------------------
+
+  -- Numerator: `TP - (FP*FN)/TN → TP`.
+  have h_num :
+      Tendsto (fun TN : ℝ => TP - FP * FN / TN) atTop (𝓝 TP) :=
+    tendsto_const_sub_const_div_atTop TP (FP * FN)
+
+  -- Denominator (inside sqrt): `A * (1 + FP/TN) * (1 + FN/TN) → A`.
+  have h_den_inside :
+      Tendsto (fun TN : ℝ => A * (1 + FP / TN) * (1 + FN / TN)) atTop (𝓝 A) := by
+    simpa using (tendsto_const_mul_one_add_mul_one_add_div_atTop A FP FN)
+
+  -- Taking `sqrt` is continuous on `ℝ`, so we can map limits through `sqrt`.
+  have h_den :
+      Tendsto (fun TN : ℝ => √ (A * (1 + FP / TN) * (1 + FN / TN))) atTop (𝓝 (√ A)) :=
+    (Filter.Tendsto.sqrt h_den_inside)
+
+  -- The quotient limit rule requires the limiting denominator to be nonzero.
+  have h_den_ne : √ A ≠ 0 := by
+    have hApos : 0 < A := by simpa [A] using (mul_pos hTPFPpos hTPFNpos)
+    exact sqrt_of_pos_ne_zero hApos
+
+  -- Quotient limit rule: if `num → Num` and `den → Den` with `Den ≠ 0`, then `num/den → Num/Den`.
+  have h_post :
+      Tendsto (fun TN : ℝ => post_step3 TP TN FP FN) atTop (𝓝 (TP / √ A)) := by
+    -- `simpa` expands `post_step3` into `num / den`.
+    simpa [post_step3, A] using (Filter.Tendsto.div h_num h_den h_den_ne)
+
+  -- Transfer the limit from `post_step3` back to `MCC` using eventual equality.
+  have h_mcc :
+      Tendsto (fun TN : ℝ => MCC TP TN FP FN) atTop (𝓝 (TP / √ A)) :=
+    h_post.congr' (Filter.EventuallyEq.symm h_eq)
+
+  ----------------------------------------------------------------------
+  -- Rewrite FM into the same closed form `TP / √A`.
+  ----------------------------------------------------------------------
+
+  have h_FM : FM TP FP FN = TP / √ A := by
+    -- `field_simp` is the workhorse for simplifying rational expressions.
+    have hmul :
+        TP / (TP + FP) * (TP / (TP + FN)) =
+          (TP ^ 2) / ((TP + FP) * (TP + FN)) := by
+      field_simp [hTPFPpos.ne', hTPFNpos.ne']
+
+    -- `simp_all` runs `simp` using *all* local hypotheses.
+    -- Here it uses `hTP_ge0` to simplify `sqrt (TP^2)` to `TP`.
+    simp_all [FM, PPV, TPR, A]
+
+  -- Replace the target limit value `TP/√A` by the equal expression `FM`.
+  simpa [h_FM] using h_mcc
+
+
+/-
+Main limit theorem:
+If TP, FP, and FN are fixed, then as TN → +∞,
+the Matthews correlation coefficient converges to the Fowlkes–Mallows index:
+
+  MCC(TP, TN, FP, FN) → FM(TP, FP, FN)  as  TN → +∞.
+
+Lean expresses limits using *filters*:
+* `atTop` is the filter corresponding to “the variable tends to +∞”
+* `𝓝 L` is the neighborhood filter at `L`, meaning “values arbitrarily close to L”
+
+So the Lean statement: `Tendsto f atTop (𝓝 L)` means `L = lim_{x → ∞} f(x)`
+-/
+theorem tendsto_MCC_atTop_eq_FM
+    {TP FP FN : ℝ}
+    (hTPFPpos : 0 < TP + FP)
+    (hTPFNpos : 0 < TP + FN)
+    (hTP_ge0 : 0 ≤ TP)
+    (hFP_ge0 : 0 ≤ FP)
+    (hFN_ge0 : 0 ≤ FN) :
+    Tendsto (fun TN : ℝ => MCC TP TN FP FN) atTop (𝓝 (FM TP FP FN)) := by
+  sorry
+
+  
   let A : ℝ := (TP + FP) * (TP + FN)
 
   -- “Work inside the limit”: for all sufficiently large `TN` (here: all `TN > 0`),

@@ -25,6 +25,7 @@
 
 \usepackage{cleveref}       % smart cross-referencing
 \usepackage{tikz}
+\usepackage{xspace}
 
 
 \usepackage{amsmath,amssymb}
@@ -40,7 +41,7 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
-\lstdefinestyle{mystyle}{
+\lstdefinestyle{mystyle}{%
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen},
     keywordstyle=\color{keywordcolor},
@@ -98,7 +99,7 @@
 % Based on my blog post
 % https://erotemic.wordpress.com/2019/10/23/closed-form-of-the-mcc-when-tn-inf/
 
-\title{
+\title{%
     The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.
 %    The limit of the MCC as the number of True negatives approaches infinity is the geometric mean of precision and recall
 %    The limit of the MCC as true negatives approach infinity is the geometric mean of precision and recall.
@@ -118,11 +119,11 @@
 %%% Add PDF metadata to help others organize their library
 %%% Once the PDF is generated, you can check the metadata with
 %%% $ pdfinfo template.pdf
-\hypersetup{
+\hypersetup{%
 pdftitle={The MCC approaches the geometric mean of precision and recall as true negatives approach infinity.},
 pdfsubject={q-cs.CV},
 pdfauthor={Jon Crall},
-pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthews Correlation Coefficient, F1,Phi-Coefficient,Ochiai Index},
+pdfkeywords={Confusion Matrix, Binary Classification, Fowlkes--Mallows Index, Matthews Correlation Coefficient, F1, Phi-Coefficient, Ochiai Index},
 colorlinks=true,       % False: boxed links; true: colored links
 %linkcolor=blue,        % Color of internal links (sections, etc.)
 %citecolor=green,       % Color of citation links
@@ -139,27 +140,24 @@ colorlinks=true,       % False: boxed links; true: colored links
     The performance of a binary classifier is described by a confusion matrix with four entries:
     the number of true positives (\TP{}), true negatives (\TN{}), false positives (\FP{}), and false
       negatives (\FN{}).
-
     The Matthews Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that
       summarize a confusion matrix.
-    Both the F1 and FM scores are based on only three of the four entries in a confusion matrix (they
-      ignore \TN{}).
-    In contrast, the MCC takes into account all four entries of a confusion matrix and thus can be seen as
-      providing a more representative picture.
+    Both the F1 and FM scores are based on only three of the four entries in a confusion matrix (they ignore
+      \TN{}).
+    Unlike F1 and FM, the MCC depends on all four entries of the confusion matrix, which can make it
+      attractive in some cases.
 
-    However, in object detection problems, the number of true negatives is effectively unbounded.
-    Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?
-    % Remove provides insight, change to something explicitly states the relationship
-    This paper provides insight into the relationship between the MCC and FM score by proving that the
-      FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
-    % TODO: might not want to phrase it as an update it looks weird. Also, the
-    % previously published work just noted the result, but did not include the
-    % proof. 
-    %\emph{Update 2026--01--28:} 
-    This result was previously noted in ecology literature in terms of the phi-coefficient and the Ochiai
-      index, but we discuss it in the context of binary classifiers.
-    We formalize the proof in Lean using LLM-assistance and also comment on the use of LLMs in locating
-      prior work.
+    However, in some open world settings, measuring the number of true negatives is not straightforward.
+    Object detection is such a case because the number of candidate negative boxes is effectively unbounded.
+    This motivates the question:
+    what is the limit of the MCC as the number of true negatives tends to infinity?
+
+    Put plainly, as the true negative count grows, the MCC converges to the FM score, which is the geometric
+      mean of precision and recall.
+    This result was previously noted in the ecology literature in terms of the phi-coefficient and the
+      Ochiai index, but we discuss it in the context of binary classifiers.
+    Furthermore, we provide a full proof of the result, including a Lean formalization.
+    We also briefly comment the emerging role of LLMs in proof assistance and in locating prior work.
 \end{abstract}
 
 
@@ -170,10 +168,10 @@ colorlinks=true,       % False: boxed links; true: colored links
 \section{Introduction}
 
 Evaluation of binary classifiers is central to the quantitative analysis of
-machine learning models \cite{powers_evaluation_2011}.
+machine learning models~\cite{powers_evaluation_2011}.
 %This paper will follow the notation in the Wikipedia article on the Confusion Matrix~\cite{wiki_cfsn} as of 2023-04-30.
 Given a finite set of examples with known real labels, the quality of a set of
-corresponding predicted labels can quantified using a $2 \times 2$ confusion
+corresponding predicted labels can be quantified using a $2 \times 2$ confusion
 matrix.  A confusion matrix counts the number of true positives (\TP{}), true
 negatives (\TN{}), false positives (\FP{}), and false negatives (\FN{}) a model
 predicts with respect to the real labels. A confusion matrix is written as:
@@ -221,11 +219,6 @@ It can be defined as the geometric mean of precision and recall~\cite{tharwat_cl
     \Fowlkes{} = \sqrt{\PPV{} \cdot \TPR{}} = \sqrt{\frac{\TP{}}{\TP{} + \FP{}} \frac{\TP{}}{\TP{} + \FN{}}}
 \end{equation}
 
-In~\cite{powers_evaluation_2011}, Powers notes that the F1 score (and consequentially any metric that only
-  includes precision and recall) only takes into account three of the four measures in a confusion matrix.
-Powers, introduces modifications of precision and recall he refers to as informedness and markedness.
-Additionally he advocates for the use of the MCC over the F1 measure.
-
 % https://en.wikipedia.org/wiki/Phi_coefficient
 The Matthews Correlation Coefficient (MCC)~\cite{matthews_comparison_1975} is
 the Pearson correlation between the truth and predictions. It accounts for all
@@ -240,15 +233,14 @@ four terms in the confusion matrix and is defined as:
     }}
 \end{equation}
 
-While the MCC is a desirable measure due to its balanced inclusion of all terms in a confusion matrix, it
-  requires that the number of true negatives is measurable.
+While the MCC can be a desirable measure, it requires that the number of true negatives is measurable.
 In the case of object detection problems~\cite{zou2023object}, this is often intractable as the number of
-  the number of predicted boxes and missed true boxes is dwarfed by the total number of boxes that the system
-  correctly did not predict.
+  predicted boxes and missed true boxes is dwarfed by the total number of boxes that the system correctly did
+  not predict.
 One can see this by considering the set of all $N\times M$ boxes centered at each pixel, most of which will
   be considered true negatives.
 If the width and height of the boxes are allowed to extend outside the image, then the number of predictable
-  boxes actually is unbounded (and even if they must be contained in the image, there will still be a very
+  boxes is unbounded (and even if they are constrained to the bounds of the image, there will still be a very
   large number of them in real world cases).
 
 Because calculating the number of true negatives is difficult for open-world problems like object detection,
@@ -256,37 +248,26 @@ Because calculating the number of true negatives is difficult for open-world pro
   positives, false positives, and false negatives, which can be used to compute PPV, TPR, F1, and FM.
 While these measures have proven themselves to be effective, simply ignoring true negatives is somewhat
   unsatisfying.
-Exploring the mathematics clarifies this.
-We can notice that in these open-world problems the number of true negatives is so large it is effectively
-  infinite and thus we ask the question:
+If we insist on understanding how the MCC behaves in this case, we can begin by studying its limiting
+  behavior.
+Notice that in these open-world problems the number of true negatives is so large it is effectively infinite
+  and thus we ask the question:
 what happens to the MCC as the number of true negatives approaches infinity?
 
 We find that the MCC converges to FM as the number of true negatives approaches infinity.
-When the first version of this paper was written, the authors were unaware of this fact appearing in the
-  literature.
-However, as of 2026, recent AI and LLM systems have begun to transform the way we can access information,
-  and using this tool we found that this result was previously known under a different names:
-the Phi coefficient and Ochiai index~\cite{decaceres_assessing_species_2008}.
-
-The layout of this paper is as follows:
-
-\begin{itemize}
-
-    \item In \Cref{sec:related_work} we connect the ``double-zero'' discussion
-        from ecology to the object detection setting, where the number of true
-        negatives is effectively unbounded.
-
-    \item In \Cref{sec:prose_proof} we provide a more explicit proof that: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$.
-
-    \item In \Cref{sec:lean} formalize this result in Lean~4.
-
-    \item In \Cref{sec:ai_usage} we briefly discuss the role of LLMs in searching related work and producing
-      the machine formalization.
-
-\end{itemize}
-
+This corresponds to a previous observation in~\cite{decaceres_assessing_species_2008}, which we discuss in
+  \Cref{sec:related_work}.
+We then prove $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes$ in \Cref{sec:prose_proof}.
+We strengthen this proof by providing a Lean~4 formalization in~\Cref{sec:lean}.
+Finally, in \Cref{sec:ai_usage} we briefly discuss the role of LLMs in searching related work and producing
+  the machine formalization.
 
 \section{Related Work}\label{sec:related_work}
+
+In~\cite{powers_evaluation_2011}, Powers notes that the F1 score (and consequentially any metric that only
+  includes precision and recall) only takes into account three of the four measures in a confusion matrix.
+Powers introduces modifications of precision and recall he refers to as informedness and markedness.
+Additionally he advocates for the use of the MCC over the F1 measure.
 
 \newcommand{\MAT}[1]{\ensuremath{
     \left[ \begin{smallmatrix} #1
@@ -311,8 +292,8 @@ The phi coefficient is the Pearson correlation between these two binary variable
 A binary confusion matrix can similarly be viewed as a $2\times 2$ contingency table, where from a machine
   learning lens, the variables correspond to the presence / absence of a prediction and the presence / absence
   of truth.
-Under the identification $(\mata{},\matb{},\matc{},\matd{})=(\TP{},\FP{},\FN{},\TN{})$, the phi coefficient (or $\phi$
-  coefficient) is identical to the Matthews' correlation coefficient (MCC).
+Under the identification $(\mata{},\matb{},\matc{},\matd{})=(\TP{},\FP{},\FN{},\TN{})$, the phi coefficient
+  (or $\phi$ coefficient) is identical to the Matthews correlation coefficient (MCC).
 Similarly, the Ochiai index~\cite{ochiai_zoogeographic_studies_1957} is exactly the FM index.
 
 The fact that the limit of the phi coefficient as \matd{} tends towards infinity converges to the Ochiai
@@ -410,71 +391,6 @@ The equation then simplifies to:
     }}
 \end{equation}
 
-%We can take the limit of this equation using using L'Hôpital's rule --- \ie{}
-%the limit is equal to the limit of the derivative of the numerator with respect
-%to \TN{} divided by the limit of the denominator with respect to \TN{}.
-
-%\begin{equation}
-%    = \lim_{\TN{} \to \infty}
-%    \frac{
-%        \frac{\partial \TP{} \cdot \TN{} - \FP{} \cdot \FN{}}{\partial \TN{}} 
-%    }
-%    {
-%        \frac{\partial \sqrt{(\TP{} + \FP{}) (\TP{} + \FN{}) (\TN{} + \FP{}) (\TN{} + \FN{})}}{\partial \TN{}}
-%    } 
-%\end{equation}
-
-%The derivative of the numerator simplifies to $\TP{}$ by applying the product
-%rule. The derivative of the denominator can be taken using the chain rule and
-%product rules. Explicitly showing this process is not too difficult, but it is
-%involved. For conciseness we omit the explicit steps and compute the derivative
-%symbolically using a computer. Taking the derivative of the numerator and
-%denominator we get:
-
-%\begin{equation}
-%    = \lim_{\TN{} \to \infty}
-%    \frac{
-%        \TP{} 
-%    }
-%    {
-%        \sqrt{
-%            \frac{
-%                (\FN{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
-%            }{
-%                4 (\FP{} + \TN{})
-%            }} + 
-%        \sqrt{
-%            \frac{
-%                (\FP{} + \TN{}) (\FN{} + \TP{}) (\FP{} + \TP{})
-%            }{
-%                4 (\FN{} + \TN{})
-%            }
-%        }
-%    }
-%\end{equation}
-
-%In the limit the terms with \TN{} cancel, resulting in:
-
-
-%\begin{equation}
-%    =
-%    \frac{
-%        \TP{} 
-%    }
-%    {
-%        \frac{
-%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
-%        }{
-%            2 
-%        } + 
-%        \frac{
-%            \sqrt{(\FN{} + \TP{}) (\FP{} + \TP{})}
-%        }{
-%            2 
-%        }
-%    } 
-%\end{equation}
-
 Thus we find that the limit of
 the MCC as true negatives approach infinity is:
 
@@ -497,21 +413,19 @@ Now, rearranging the equation for FM, we find it is equivalent to the limit of t
                &= \frac{\TP{}}{\sqrt{(\TP{} + \FP{}) (\TP{} + \FN{})}} \\
                &= \lim_{\TN{} \to \infty} \MCC{}
 \end{align}
-%\end{equation}
 
 
 Thus we have proven $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}$ \hspace{10pt}\dots{} or have we?
-This particular argument is simple to verify, but does assume knowledge about algebra and limits and assumes
-  justifications are always clear for each step.
+This particular argument is simple to verify, but it does assume knowledge about algebra and limits and
+  assumes justifications are always clear for each step.
 Perhaps a skeptic would be more convinced with a machine checkable claim.
 
 \paragraph{Verifying the proof}
 
-The correctness of these claims can be verified using SymPy~\cite{sympy17}. We
-define a symbolic expression for the definition of the MCC and FM score. We
-then use SymPy to determine the limit of the MCC as $\TN{} \to \infty$. 
-Finally we subtract expressions that we claim are equal, which will result in
-zero only if they are equal.
+The correctness of these claims can be verified using SymPy~\cite{sympy17}.
+We define a symbolic expression for the definition of the MCC and FM score.
+We then use SymPy to determine the limit of the MCC as $\TN{} \to \infty$.
+Finally we subtract expressions that we claim are equal, which will result in zero only if they are equal.
 
 \begin{lstlisting}[language=Python]
 from sympy import sqrt, symbols, simplify
@@ -530,7 +444,7 @@ FM = sqrt((tp / (tp + fn)) * (tp / (tp + fp)))
 # Compute the limit of the MCC definition
 mcc_lim = limit(mcc, tn, float("inf"))
 
-# We claim the limit of the MCC and the FM are equivalant to:
+# We claim the limit of the MCC and the FM are equivalent to:
 mcc_lim_claim = tp / sqrt((tp + fn) * ((tp + fp)))
 
 # Check the claim is equal to FM
@@ -540,7 +454,7 @@ assert simplify(mcc_lim - mcc_lim_claim) == 0
 
 \end{lstlisting}
 
-The above program does not raise an AssertionError, thus we have proven $\lim_{\TN{} \to \infty} \MCC{} =
+The above program does not raise an \texttt{AssertionError}, thus we have proven $\lim_{\TN{} \to \infty} \MCC{} =
   \Fowlkes{}$\hspace{10pt}\dots{} or have we?
 Do we trust that SymPy's symbolic manipulations are always valid?
 It is a large software package, which can have bugs, and a full audit is difficult.
@@ -698,20 +612,27 @@ lemma sqrt_div_eq_sqrt_div_sq {x t : \Real} (h_xge0 : 0 \le x) (h_tge0 : 0 \le t
     \root x / t = \root (x / (t ^ 2)) := by aesop
 \end{lstlisting}
 
-We are now prepared to state and prove the main theorem. Under conditions where
-confusion matrix entries are non-zero, and denominators are non-zero, the
-Matthews Correlation Coefficient converges towards the Fowlkes-Mallows index as
-true negatives become arbitrarily large:
+\newpage
+
+We are now prepared to state the main theorem.
+Under conditions where confusion matrix entries are non-negative, and both $\TP{} + \FP{}$ and $\TP{} +
+  \FN{}$ are positive, the Matthews Correlation Coefficient converges towards the Fowlkes-Mallows index as
+  true negatives become arbitrarily large:
 
 \begin{lstlisting}[language=lean]
 theorem tendsto_MCC_atTop_eq_FM
     {TP FP FN : \Real}
-    (hTPFPpos : 0 < TP + FP)
-    (hTPFNpos : 0 < TP + FN)
     (hTP_geq0 : 0 \le TP)
     (hFP_geq0 : 0 \le FP)
-    (hFN_geq0 : 0 \le FN) :
+    (hFN_geq0 : 0 \le FN) 
+    (hTPFPpos : 0 < TP + FP)
+    (hTPFNpos : 0 < TP + FN) :
     Tendsto (fun TN : \Real => MCC TP TN FP FN) atTop (\nhdsSym (FM TP FP FN)) := by
+\end{lstlisting}
+
+With the claim now stated, the proof of this theorem is:
+
+\begin{lstlisting}[language=lean]
   -- `A` is the constant factor that does not depend on TN.
   let A : \Real := (TP + FP) * (TP + FN)
   -- This is the "post step 3" expression: the same one that appears in the algebraic limit.
@@ -793,82 +714,53 @@ The above Lean code compiles with version
 \texttt{leanprover/lean4:v4.28.0-rc1}, thus --- up to soundness holes in the
 Lean kernel --- we have proven: $\lim_{\TN{} \to \infty} \MCC{} = \Fowlkes{}, \square{}$.
 
-%Here \code{MCC} and \code{FM} are the direct Lean definitions corresponding to
-%the formulas in this paper. The full proof is 654 lines. It is available in
-%these forms:
-
-%https://github.com/Erotemic/paper-g1-and-mcc/blob/main/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean
-%\begin{itemize}
-%\item GitHub permalink: \\
-%\href{https://github.com/Erotemic/paper-g1-and-mcc/blob/89dc05e80432f727cc41f07ecfeda5c87e69945d/mcc-proof/MCC_atTop_eq_FM/WuAristotle.lean}{%
-%    \texttt{https://github.com/Erotemic/paper-g1-and-mcc/blob/}\\%
-%    \texttt{89dc05e80432f727cc41f07ecfeda5c87e69945d/}%
-%\texttt{mcc-proof/MCC\_atTop\_eq\_FM/WuAristotle.lean}}
-
-%%** TODO: Add sha256 checksum **
-
-%\item IPFS snapshot (CID): \\
-%\href{https://ipfs.io/ipfs/bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}{%
-%\texttt{https://ipfs.io/ipfs/}%
-%\texttt{bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu}}
-%\end{itemize}
-
-%%# Aristotle version
-%%bafybeihfg46sgh2bg2fy3rph5wjdzgwcrxufph2w6vd35isz2rhbvvibpu
-
-%%# GPT 5.1 version
-%%bafkreihwpqlr3s2mcu6csopndx3pvpo5az7m66iw5ox4lnqk7i3jjihnky
-
-
-%The GitHub permalink fixes the exact commit, and the IPFS CID fixes the exact
-%file content, providing redundancy against link rot and build-in checksum
-%verification.
 
 \section{LLM Usage}\label{sec:ai_usage}
 
-LLMs have begun to enable new workflows in math and science research.
-Here, they were used to find the Lean 4 formalization of the proof and search for related work.
+The role of LLMs in scientific and mathematics research is growing~\cite{luo_llm4sr_survey_2025}.
+In this work they played two important roles.
+First, they helped the author, who was previously unfamiliar with Lean, to formalize this simple but
+  non-trivial proof.
+Second, they helped identify related work published in a different field with different terminology.
+This section is anecdotal and is included as a record of how LLMs were used in this work.
 
 \paragraph{Formalization with LLMs}
 
-
-
-The Lean proof shown in this paper was written using GPT 5.2. 
-The first version was written using GPT-5.1~\cite{openai_gpt5_system_card}.
-GPT-5.1 was able to complete the proof in 654 lines, but it manually required feedback from Lean and was
-  prone to syntax errors.
-Earlier attempts using the GPT-5 and GPT-4o models~\cite{openai_gpt4o_system_card} were not successful in
-  producing working Lean proof.
+Lean is not a simple language.
+Using it effectively requires a significant amount of background knowledge.
+The author started making manual efforts to formalize this proof in 2023 without much progress.
+Around this time LLMs such as GPT-4o~\cite{openai_gpt4o_system_card} and
+  GPT-5~\cite{openai_gpt5_system_card} started demonstrating impressive capabilities.
+However, the author's efforts to use them to help formalize the proof were unsuccessful.
+The first successful version of the proof was written using
+  GPT-5.1~\cite{openai_gpt51_system_card_addendum}.
+It required significant manual feedback, was prone to syntax errors, and the result was 654 lines long, but
+  it worked.
 Further refinement from Aristotle~\cite{achim2025aristotleimolevelautomatedtheorem} and users on
   leanprover.zulipchat~\cite{crall2025zulip561031593} refined this to 66 lines (including comments).
 Building on that, GPT-5.2\cite{openai_gpt52_system_card} with extended thinking and manual feedback was able
-  to produce the proof that matches the structure or the original natural language argument, and is the
+  to produce the proof that better matches the structure of the original natural language argument, and is the
   version presented here.
-% Note aristotle proof
 
 \paragraph{Literature Search with LLMs}
-The relationship proved in this paper was initially investigated by the author under the terminology of
-  binary-classification evaluation (MCC, precision/recall, and the Fowlkes--Mallows score) and motivated by
-  open-world object detection, where the number of true negatives is ill-defined or effectively unbounded.
-While searching within this vocabulary did not reveal an explicit prior statement of the limit, we later
-  found closely related discussion in the ecology literature expressed using different names for the same
-  $2\times 2$ contingency table quantities (phi coefficient, double zeros, and the Ochiai similarity).
-Modern LLM-assisted semantic search was instrumental in suggesting this alternate terminology, after which
-  the connection was verified directly by reading the cited sources and translating notation.
+
+When the original version of this paper (\url{https://arxiv.org/abs/2305.00594v1}) was posted to arXiv in
+  2023, we were unaware of this limit relationship being noted elsewhere in the literature.
+While revising the paper, we revisited the literature review using LLM-assisted search and identified that
+  this result was known, but in a different context and with different names.
+More details are given in \Cref{sec:related_work}.
+We note this as an example of LLMs bridging a terminology gap in the search for related work.
 
 
 \section{Conclusion}\label{sec:conclusion}
 
-\renewcommand{\ie}{i.e.} % not sure why I needed to renew this command 
-This paper proves that the limit of the MCC as the number of true negatives
-goes to infinity is equivalent to the Fowlkes--Mallows index (\ie{} the
-geometric mean of precision and recall).
-
-This is a useful insight in open world problems where the number of true negative cases grows faster than
-  the number of other confusion categories.
-It validates the use of precision and recall as a way of describing the quality of object detection results
-  and hints that the FM score may be a preferable alternative to the more standard F1 score.
-
+This paper proves that the limit of the MCC as the number of true negatives goes to infinity is the
+  Fowlkes--Mallows index (\ie{} the geometric mean of precision and recall) and provides a Lean 4
+  formalization.
+We interpret this result in the context of object detection where the number of true negatives is
+  effectively unbounded.
+We connect this to a previous observation in the ecology literature and briefly discuss the role of LLMs in
+  finding that connection.
 
 \section{Acknowledgements}\label{sec:ack}
 
