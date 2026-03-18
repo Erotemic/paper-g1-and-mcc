@@ -1,5 +1,21 @@
-The performance of a binary classifier is described by a confusion matrix with four entries: the number of true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN).
+The performance of a binary classifier is described by a confusion matrix with
+four entries: the number of true positives (TP), true negatives (TN), false
+positives (FP), and false negatives (FN). The Matthews Correlation Coefficient
+(MCC), F1, and Fowlkes–Mallows (FM) scores are scalars that summarize a
+confusion matrix. Both the F1 and FM scores are based on only three of the four
+entries in a confusion matrix (they ignore TN). Unlike F1 and FM, the MCC
+depends on all four entries of the confusion matrix, which can make it
+attractive in some cases.
 
-The Matthew's Correlation Coefficient (MCC), F1, and Fowlkes--Mallows (FM) scores are scalars that summarize a confusion matrix.  Both the F1 and FM scores are based on only three of the four entries in the confusion matrix (they ignore TN).  In contrast, the MCC takes into account all four entries of the confusion matrix and thus can be seen as providing a more representative picture.
+However, in some open world settings, measuring the number of true negatives is
+not straightforward.  Object detection is such a case because the number of
+candidate negative boxes is effectively unbounded. This motivates the question:
+what is the limit of the MCC as the number of true negatives tends to infinity?
 
-However, in object detection problems, measuring the number of true negatives is so large it is often intractable.  Thus we ask, what happens to the MCC as the number of true negatives approaches infinity?  This paper provides insight into the relationship between the MCC and FM score by proving that the FM-measure is equal to the limit of the MCC as the number of true negatives approaches infinity.
+Put plainly, as the true negative count grows, the MCC converges to the FM
+score, which is the geometric mean of precision and recall. This result was
+previously noted in the ecology literature in terms of the phi-coefficient and
+the Ochiai index, but we discuss it in the context of binary classifiers.
+Furthermore, we provide a full proof of the result, including a Lean
+formalization. We also briefly comment on the emerging role of LLMs in proof
+assistance and in locating prior work.
