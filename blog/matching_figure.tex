@@ -24,12 +24,16 @@
 \definecolor{kwdarkgreen}{HTML}{2E5524}
 \definecolor{kwdarkblue}{HTML}{003765}
 
-% Identity colors for the truth / prediction boxes. Kept muted and deliberately
+% Identity colors for the truth / prediction boxes. 
 % OUTSIDE the green/orange/red/blue family used for the confusion outcomes, so a
 % "truth box" is never mistaken for a TP and a "prediction box" never for a TN.
 % These are placeholders -- tweak them freely.
-\definecolor{truthcol}{HTML}{7A4FA3}   % truth boxes      (muted purple)
-\definecolor{predcol}{HTML}{5A6473}    % prediction boxes (slate gray)
+\definecolor{truthcol}{HTML}{5E3A9E}   % truth boxes     
+\definecolor{predcol}{HTML}{A65A7A}    % prediction boxes 
+
+% Slate gray: 5A6473
+
+
 
 \newcommand{\TP}{\textcolor{kwgreen}{\texttt{\textbf{TP}}}}
 \newcommand{\FP}{\textcolor{kwred}{\texttt{\textbf{FP}}}}
@@ -102,7 +106,7 @@
 
 % Caption + image credit, kept inside Panel 1's width so it doesn't bleed across.
 \node[note, align=left, text width=5.70cm, anchor=south west] at ([xshift=0.26cm,yshift=0.52cm]P1.south west) {%
-Dog found (P1), grass falsely flagged (P2), cat missed (T2).};
+Dog found (T1/P1), grass falsely flagged (P2), cat missed (T2).};
 \node[font=\tiny, text=black!42, align=left, text width=5.70cm, anchor=south west] at ([xshift=0.26cm,yshift=0.14cm]P1.south west) {%
 Photo: publicdomainpictures.net \#24076, CC0.};
 
@@ -177,7 +181,7 @@ background & $\to$ \TN \\
 \node[note, anchor=east] at ($(CMNW)+(-0.18,-1.95)$) {negative};
 
 \node[body, align=left, text width=5.45cm, anchor=north west] at ([xshift=6.05cm,yshift=-1.10cm]P4.north west) {
-\textbf{After assignment, view detection as classification.}\\[0.25em]
+\textbf{View detection as classification.}\\[0.25em]
 Once the assignment is fixed, every box becomes one cell of a confusion matrix: matched pairs are \TP, predictions matched to nothing are \FP, and unmatched truths are \FN. Our small example gives one of each.};
 
 \node[body, align=left, text width=4.30cm, anchor=north east] at ([xshift=-0.24cm,yshift=-1.10cm]P4.north east) {
