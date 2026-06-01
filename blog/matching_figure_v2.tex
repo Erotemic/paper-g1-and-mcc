@@ -196,7 +196,7 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[body] at ($(CMNW)+(0.99,-1.73)$) {\FP};
 \node[note,align=center] at ($(CMNW)+(0.99,-2.17)$) {spurious box\\(here: 1)};
 \node[body] at ($(CMNW)+(3.11,-1.73)$) {\TN};
-\node[note,align=center] at ($(CMNW)+(3.11,-2.17)$) {correctly empty\\(uncounted)};
+\node[note,align=center] at ($(CMNW)+(3.11,-2.17)$) {correctly empty\\(here: 0)};
 
 \node[body, anchor=south] at ($(CMNW)+(2.05,0.10)$) {Predicted};
 \node[note, anchor=south] at ($(CMNW)+(0.99,-0.08)$) {positive};
@@ -209,7 +209,7 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=5.70cm,yshift=-1.18cm]P4.north west) {
 %\textbf{View detection as classification.}\\[0.3em]
 With the assignment fixed, each box is one cell of this matrix: a matched pair is a \TP, a prediction with no truth a \FP, and a truth with no prediction a \FN.\\[0.3em]
-Our small example gives one of each.};
+Our small example gives one of each. But notice that \TN{} is zero and typically uncounted.};
 
 % =====================  Panel 5: where are the TN?  ====================
 % One more copy of the image.  The two real objects (T1, T2) are boxed; every
