@@ -1,0 +1,252 @@
+% ---------------------------------------------------------------------------
+% Figure: scoring object detection as a two-step process
+%   (1) assign predicted boxes to truth boxes, then
+%   (2) read the assignment off as a binary-classification confusion matrix.
+%
+% Photograph: "cat-and-dog.jpg"
+%   Source: https://www.publicdomainpictures.net/en/view-image.php?image=24076&picture=cat-and-dog
+%   License: CC0 1.0 (Public Domain Dedication). No attribution required; credited here as a courtesy.
+% ---------------------------------------------------------------------------
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\definecolor{kwgreen}{HTML}{3EAE2B}
+\definecolor{kwblue}{HTML}{0068C7}
+\definecolor{kworange}{HTML}{EF7724}
+\definecolor{kwred}{HTML}{F42836}
+\definecolor{kwdarkgreen}{HTML}{2E5524}
+\definecolor{kwdarkblue}{HTML}{003765}
+
+% Identity colors for the truth / prediction boxes. 
+% OUTSIDE the green/orange/red/blue family used for the confusion outcomes, so a
+% "truth box" is never mistaken for a TP and a "prediction box" never for a TN.
+% These are placeholders -- tweak them freely.
+\definecolor{truthcol}{HTML}{5E3A9E}   % truth boxes     
+\definecolor{predcol}{HTML}{A65A7A}    % prediction boxes 
+
+% Slate gray: 5A6473
+
+
+
+\newcommand{\TP}{\textcolor{kwgreen}{\texttt{\textbf{TP}}}}
+\newcommand{\FP}{\textcolor{kwred}{\texttt{\textbf{FP}}}}
+\newcommand{\FN}{\textcolor{kworange}{\texttt{\textbf{FN}}}}
+\newcommand{\TN}{\textcolor{kwblue}{\texttt{\textbf{TN}}}}
+
+% Displayed size of each photo copy in Panel 1 (the photo is 1280x1920, i.e. 2:3 portrait).
+\def\Wd{1.80}   % width  in cm
+\def\Hd{2.70}   % height in cm  (= 1.80 * 1920/1280)
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Latex,
+    font=\sffamily,
+    panel/.style={draw=black!18, rounded corners=2pt, line width=0.7pt, fill=white},
+    ptitle/.style={font=\bfseries\normalsize, text=kwdarkblue, anchor=north west},
+    body/.style={font=\scriptsize, text=black},
+    note/.style={font=\tiny, text=black!65},
+    arrow/.style={-Latex, line width=0.95pt, draw=black!65},
+    darrow/.style={-Latex, line width=0.85pt, draw=black!42, dashed},
+    imtag/.style={font=\tiny\bfseries, text=white, inner sep=1.2pt, rounded corners=1pt, anchor=north west},
+    tbox/.style={draw=truthcol, line width=1.1pt, minimum width=1.05cm, minimum height=0.62cm, align=center, font=\small},
+    pbox/.style={draw=predcol, line width=1.1pt, minimum width=1.05cm, minimum height=0.62cm, align=center, font=\small},
+    eslot/.style={draw=black!35, dashed, line width=0.9pt, minimum width=1.05cm, minimum height=0.62cm, align=center, font=\small, text=black!45},
+    dot/.style={circle, inner sep=0pt, minimum size=7pt}
+]
+
+% ---- Layout -------------------------------------------------------------
+\def\gap{0.26}
+\def\wA{6.20}
+\def\wB{4.95}
+\def\wC{5.15}
+\def\wD{9.50}   % bottom-left: confusion matrix (shrunk)
+\def\wE{7.06}   % bottom-right: where are the TN?  (\wD + gap + \wE = top-row width)
+\def\hTop{5.10}
+\def\hBot{4.15}
+
+\coordinate (NW) at (0,0);
+\node[panel, minimum width=\wA cm, minimum height=\hTop cm, anchor=north west] (P1) at (NW) {};
+\node[panel, minimum width=\wB cm, minimum height=\hTop cm, anchor=north west] (P2) at ([xshift=\wA cm + \gap cm]NW) {};
+\node[panel, minimum width=\wC cm, minimum height=\hTop cm, anchor=north west] (P3) at ([xshift=\wA cm + \wB cm + 2*\gap cm]NW) {};
+\node[panel, minimum width=\wD cm, minimum height=\hBot cm, anchor=north west] (P4) at ([yshift=-\hTop cm - \gap cm]NW) {};
+\node[panel, minimum width=\wE cm, minimum height=\hBot cm, anchor=north west] (P5) at ([xshift=\wD cm + \gap cm, yshift=-\hTop cm - \gap cm]NW) {};
+
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P1.north west) {1. Inputs};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P2.north west) {2. Assignment};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P3.north west) {3. Classification view};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P4.north west) {4. Confusion matrix};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P5.north west) {5. Where are the \TN?};
+
+% =====================  Panel 1: image, truth, predictions  =============
+\node[body, anchor=south west]  at ([xshift=0.70cm,yshift=-1.20cm]P1.north west) {Image};
+\node[body, text=truthcol, anchor=south] at ([xshift=3.10cm,yshift=-1.20cm]P1.north west) {Ground truth};
+\node[body, text=predcol, anchor=south] at ([xshift=5.02cm,yshift=-1.20cm]P1.north west) {Predictions};
+
+\node[anchor=north west, inner sep=0pt] (I1) at ([xshift=0.24cm,yshift=-1.14cm]P1.north west)
+    {\includegraphics[width=\Wd cm]{cat-and-dog.jpg}};
+\node[anchor=north west, inner sep=0pt] (I2) at ([xshift=2.18cm,yshift=-1.14cm]P1.north west)
+    {\includegraphics[width=\Wd cm]{cat-and-dog.jpg}};
+\node[anchor=north west, inner sep=0pt] (I3) at ([xshift=4.12cm,yshift=-1.14cm]P1.north west)
+    {\includegraphics[width=\Wd cm]{cat-and-dog.jpg}};
+
+% Ground-truth boxes: T1 = dog, T2 = cat
+\draw[truthcol, line width=1.2pt] ([xshift=0.054cm,yshift=-0.405cm]I2.north west) rectangle ([xshift=1.098cm,yshift=-2.592cm]I2.north west);
+\draw[truthcol, line width=1.2pt] ([xshift=0.957cm,yshift=-1.188cm]I2.north west) rectangle ([xshift=1.741cm,yshift=-2.511cm]I2.north west);
+\node[imtag, fill=truthcol] at ([xshift=0.054cm,yshift=-0.405cm]I2.north west) {T1};
+\node[imtag, fill=truthcol] at ([xshift=0.887cm,yshift=-1.188cm]I2.north west) {T2};
+
+% Predicted boxes: P1 = good dog detection, P2 = spurious box on grass
+\draw[predcol, line width=1.2pt] ([xshift=0.054cm,yshift=-0.459cm]I3.north west) rectangle ([xshift=1.053cm,yshift=-2.565cm]I3.north west);
+\draw[predcol, line width=1.2pt] ([xshift=1.260cm,yshift=-0.162cm]I3.north west) rectangle ([xshift=1.656cm,yshift=-0.810cm]I3.north west);
+\node[imtag, fill=predcol] at ([xshift=0.054cm,yshift=-0.459cm]I3.north west) {P1};
+\node[imtag, fill=predcol, anchor=north east] at ([xshift=1.656cm,yshift=-0.162cm]I3.north west) {P2};
+
+% Caption + image credit, kept inside Panel 1's width so it doesn't bleed across.
+\node[note, align=left, text width=5.70cm, anchor=south west] at ([xshift=0.26cm,yshift=0.52cm]P1.south west) {%
+Dog found (T1/P1), grass falsely flagged (P2), cat missed (T2).};
+\node[font=\tiny, text=black!42, align=left, text width=5.70cm, anchor=south west] at ([xshift=0.26cm,yshift=0.14cm]P1.south west) {%
+Photo: publicdomainpictures.net \#24076, CC0.};
+
+% =====================  Panel 2: assignment  ===========================
+\node[body, align=center, anchor=north] at ([yshift=-0.52cm]P2.north)
+    {Match each prediction to a truth box};
+\node[note, anchor=north] at ([yshift=-0.86cm]P2.north)
+    {e.g.\ one-to-one by IoU overlap};
+
+\coordinate (Q) at (P2.north west);
+\node[body, text=truthcol, anchor=south] at ($(Q)+(1.15,-1.76)$) {Truth};
+\node[body, text=predcol,  anchor=south] at ($(Q)+(3.05,-1.76)$) {Prediction};
+\node[body, anchor=south] at ($(Q)+(4.45,-1.76)$) {Result};
+
+% Row 1: matched -> TP
+\node[tbox] (T1) at ($(Q)+(1.15,-2.08)$) {$T_1$};
+\node[pbox] (P1b) at ($(Q)+(3.05,-2.08)$) {$P_1$};
+\draw[arrow] (T1.east) -- (P1b.west);
+\node at ($(Q)+(4.45,-2.08)$) {\TP};
+
+% Row 2: truth with no prediction -> FN
+\node[tbox] (T2) at ($(Q)+(1.15,-3.02)$) {$T_2$};
+\node[eslot] (E1) at ($(Q)+(3.05,-3.02)$) {$\varnothing$};
+\draw[darrow] (T2.east) -- (E1.west);
+\node at ($(Q)+(4.45,-3.02)$) {\FN};
+
+% Row 3: prediction with no truth -> FP
+\node[eslot] (E2) at ($(Q)+(1.15,-3.96)$) {$\varnothing$};
+\node[pbox] (P2b) at ($(Q)+(3.05,-3.96)$) {$P_2$};
+\draw[darrow] (P2b.west) -- (E2.east);
+\node at ($(Q)+(4.45,-3.96)$) {\FP};
+
+\node[note, anchor=south] at ([yshift=0.10cm]P2.south)
+    {solid = matched\quad\textbullet\quad dashed = no match ($\varnothing$)};
+
+% =====================  Panel 3: classification view (outcome coloring)  ====
+% Same truth/prediction pair as Panel 1, but each box is now recolored by the
+% outcome it earned: matched dog = TP (green), missed cat = FN (orange),
+% spurious grass box = FP (red).  No TN appears -- which is the whole point.
+\def\Ws{1.60}   % small copy width  (cm)
+\def\Hs{2.40}   % small copy height (= 1.60 * 1.5)
+
+\node[note, text=truthcol, anchor=south] at ([xshift=1.36cm,yshift=-1.15cm]P3.north west) {Ground truth};
+\node[note, text=predcol, anchor=south] at ([xshift=3.74cm,yshift=-1.15cm]P3.north west) {Predictions};
+
+\node[anchor=north west, inner sep=0pt] (J1) at ([xshift=0.56cm,yshift=-1.10cm]P3.north west)
+    {\includegraphics[width=\Ws cm]{cat-and-dog.jpg}};
+\node[anchor=north west, inner sep=0pt] (J2) at ([xshift=2.94cm,yshift=-1.10cm]P3.north west)
+    {\includegraphics[width=\Ws cm]{cat-and-dog.jpg}};
+
+% Truth image: dog -> TP (green), cat -> FN (orange)
+\draw[kwgreen,  line width=1.2pt] ([xshift=0.048cm,yshift=-0.360cm]J1.north west) rectangle ([xshift=0.976cm,yshift=-2.304cm]J1.north west);
+\draw[kworange, line width=1.2pt] ([xshift=0.851cm,yshift=-1.056cm]J1.north west) rectangle ([xshift=1.548cm,yshift=-2.232cm]J1.north west);
+\node[imtag, fill=kwgreen]  at ([xshift=0.048cm,yshift=-0.360cm]J1.north west) {TP};
+\node[imtag, fill=kworange] at ([xshift=0.851cm,yshift=-1.056cm]J1.north west) {FN};
+
+% Prediction image: dog -> TP (green), grass box -> FP (red)
+\draw[kwgreen, line width=1.2pt] ([xshift=0.048cm,yshift=-0.408cm]J2.north west) rectangle ([xshift=0.936cm,yshift=-2.280cm]J2.north west);
+\draw[kwred,   line width=1.2pt] ([xshift=1.120cm,yshift=-0.144cm]J2.north west) rectangle ([xshift=1.472cm,yshift=-0.720cm]J2.north west);
+\node[imtag, fill=kwgreen]                  at ([xshift=0.048cm,yshift=-0.408cm]J2.north west) {TP};
+\node[imtag, fill=kwred, anchor=north east] at ([xshift=1.472cm,yshift=-0.144cm]J2.north west) {FP};
+
+% Legend: define each outcome and its color.
+\node[note, anchor=north west] at ([xshift=0.34cm,yshift=-3.62cm]P3.north west) {Each match or leftover is one of:};
+\node[body, align=left, text width=2.35cm, anchor=north west] at ([xshift=0.30cm,yshift=-3.92cm]P3.north west) {%
+\tikz{\node[dot,fill=kwgreen]{};}\,\TP\ matched pair\\[0.55em]
+\tikz{\node[dot,fill=kwred]{};}\,\FP\ false box};
+\node[body, align=left, text width=2.35cm, anchor=north west] at ([xshift=2.75cm,yshift=-3.92cm]P3.north west) {%
+\tikz{\node[dot,fill=kworange]{};}\,\FN\ missed truth\\[0.55em]
+\tikz{\node[dot,fill=kwblue]{};}\,\TN\ empty region};
+
+% =====================  Panel 4: confusion matrix  =====================
+\coordinate (CMNW) at ([xshift=1.20cm,yshift=-1.18cm]P4.north west);
+\draw[fill=kwgreen!20,  draw=white] (CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kworange!22, draw=white] ([xshift=2.12cm]CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kwred!16,    draw=white] ([yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kwblue!16,   draw=white] ([xshift=2.12cm,yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
+
+\node[body] at ($(CMNW)+(0.99,-0.40)$) {\TP};
+\node[note,align=center] at ($(CMNW)+(0.99,-0.84)$) {matched\\(here: 1)};
+\node[body] at ($(CMNW)+(3.11,-0.40)$) {\FN};
+\node[note,align=center] at ($(CMNW)+(3.11,-0.84)$) {missed truth\\(here: 1)};
+\node[body] at ($(CMNW)+(0.99,-1.73)$) {\FP};
+\node[note,align=center] at ($(CMNW)+(0.99,-2.17)$) {spurious box\\(here: 1)};
+\node[body] at ($(CMNW)+(3.11,-1.73)$) {\TN};
+\node[note,align=center] at ($(CMNW)+(3.11,-2.17)$) {correctly empty\\(uncounted)};
+
+\node[body, anchor=south] at ($(CMNW)+(2.05,0.10)$) {Predicted};
+\node[note, anchor=south] at ($(CMNW)+(0.99,-0.08)$) {positive};
+\node[note, anchor=south] at ($(CMNW)+(3.11,-0.08)$) {negative};
+\node[body, rotate=90] at ($(CMNW)+(-0.78,-1.28)$) {Real};
+\node[note, rotate=90, anchor=south] at ($(CMNW)+(-0.16,-0.61)$) {positive};
+\node[note, rotate=90, anchor=south] at ($(CMNW)+(-0.16,-1.95)$) {negative};
+
+% --- Keep the "view detection as classification" takeaway beside the matrix.
+\node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=5.70cm,yshift=-1.18cm]P4.north west) {
+%\textbf{View detection as classification.}\\[0.3em]
+With the assignment fixed, each box is one cell of this matrix: a matched pair is a \TP, a prediction with no truth a \FP, and a truth with no prediction a \FN.\\[0.3em]
+Our small example gives one of each.};
+
+% =====================  Panel 5: where are the TN?  ====================
+% One more copy of the image.  The two real objects (T1, T2) are boxed; every
+% OTHER box you could draw is a true negative.  The TN grid is masked so it
+% never overlaps T1 or T2 -- the empty background is what "explodes".
+\def\Wt{2.00}   % TN image width  (cm)
+\def\Ht{3.00}   % TN image height (= 2.00 * 1.5)
+\node[anchor=north west, inner sep=0pt] (IT) at ([xshift=0.40cm,yshift=-1.00cm]P5.north west)
+    {\includegraphics[width=\Wt cm]{cat-and-dog.jpg}};
+
+% Dense grid of candidate background boxes, skipping any cell that touches an object.
+\foreach \i in {0,...,7}{
+  \foreach \j in {0,...,11}{
+    \pgfmathsetmacro{\nxa}{\i/8}\pgfmathsetmacro{\nxb}{(\i+1)/8}
+    \pgfmathsetmacro{\nya}{\j/12}\pgfmathsetmacro{\nyb}{(\j+1)/12}
+    \pgfmathtruncatemacro{\hit}{ ((\nxa<0.610)&&(\nxb>0.030)&&(\nya<0.960)&&(\nyb>0.150)) || ((\nxa<0.967)&&(\nxb>0.532)&&(\nya<0.930)&&(\nyb>0.440)) ? 1 : 0 }
+    \ifnum\hit=0
+      \pgfmathsetmacro{\bxa}{(\i+0.16)/8*\Wt}\pgfmathsetmacro{\bxb}{(\i+0.84)/8*\Wt}
+      \pgfmathsetmacro{\bya}{-(\j+0.16)/12*\Ht}\pgfmathsetmacro{\byb}{-(\j+0.84)/12*\Ht}
+      \draw[kwblue, line width=0.25pt, fill=kwblue, fill opacity=0.13]
+        ([xshift=\bxa cm,yshift=\bya cm]IT.north west) rectangle ([xshift=\bxb cm,yshift=\byb cm]IT.north west);
+    \fi
+  }}
+% A couple of larger background boxes, to show that ANY size counts too.
+\draw[kwblue, line width=0.5pt, fill=kwblue, fill opacity=0.07] ([xshift=0.10cm,yshift=-0.06cm]IT.north west) rectangle ([xshift=1.10cm,yshift=-0.39cm]IT.north west);
+\draw[kwblue, line width=0.5pt, fill=kwblue, fill opacity=0.07] ([xshift=1.28cm,yshift=-0.15cm]IT.north west) rectangle ([xshift=1.94cm,yshift=-1.20cm]IT.north west);
+
+% The two real objects, for reference.
+\draw[truthcol, line width=1.1pt] ([xshift=0.06cm,yshift=-0.45cm]IT.north west) rectangle ([xshift=1.22cm,yshift=-2.88cm]IT.north west);
+\draw[truthcol, line width=1.1pt] ([xshift=1.064cm,yshift=-1.32cm]IT.north west) rectangle ([xshift=1.934cm,yshift=-2.79cm]IT.north west);
+\node[imtag, fill=truthcol] at ([xshift=0.06cm,yshift=-0.45cm]IT.north west) {T1};
+\node[imtag, fill=truthcol] at ([xshift=1.064cm,yshift=-1.32cm]IT.north west) {T2};
+\node[imtag, fill=kwblue] at ([xshift=0.04cm,yshift=-0.04cm]IT.north west) {TN};
+
+\node[body, align=left, text width=4.05cm, anchor=north west] at ([xshift=2.75cm,yshift=-1.05cm]P5.north west) {
+Boxing the two objects leaves \emph{everything else}: each box you could draw that matches no real object is a \TN --- at every position and \emph{every} size.\\[0.35em]
+There is no natural limit, so the usual metrics ignore \TN. This paper instead asks what the score approaches as \TN${}\to\infty$.};
+
+\end{tikzpicture}
+\end{document}
