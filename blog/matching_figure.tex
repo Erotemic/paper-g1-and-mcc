@@ -1,0 +1,152 @@
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\definecolor{kwgreen}{HTML}{3EAE2B}
+\definecolor{kwblue}{HTML}{0068C7}
+\definecolor{kworange}{HTML}{EF7724}
+\definecolor{kwred}{HTML}{F42836}
+\definecolor{kwdarkgreen}{HTML}{2E5524}
+\definecolor{kwdarkblue}{HTML}{003765}
+
+\newcommand{\TP}{\textcolor{kwgreen}{\texttt{\textbf{TP}}}}
+\newcommand{\FP}{\textcolor{kwred}{\texttt{\textbf{FP}}}}
+\newcommand{\FN}{\textcolor{kworange}{\texttt{\textbf{FN}}}}
+\newcommand{\TN}{\textcolor{kwblue}{\texttt{\textbf{TN}}}}
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Latex,
+    font=\sffamily,
+    panel/.style={draw=black!18, rounded corners=2pt, line width=0.7pt, fill=white},
+    ptitle/.style={font=\bfseries\normalsize, text=kwdarkblue, anchor=north west},
+    body/.style={font=\scriptsize, text=black},
+    note/.style={font=\tiny, text=black!65},
+    arrow/.style={-Latex, line width=0.95pt, draw=black!65},
+    darrow/.style={-Latex, line width=0.85pt, draw=black!48, dashed},
+    truthbox/.style={draw=kwgreen, line width=1.1pt, minimum width=1.25cm, minimum height=0.96cm, align=center},
+    predbox/.style={draw=kwblue, line width=1.1pt, minimum width=1.12cm, minimum height=0.70cm, align=center},
+    dot/.style={circle, inner sep=0pt, minimum size=7pt}
+]
+
+% Layout
+\def\gap{0.26}
+\def\wA{6.20}
+\def\wB{4.95}
+\def\wC{5.15}
+\def\hTop{4.95}
+\def\hBot{4.15}
+
+\coordinate (NW) at (0,0);
+\node[panel, minimum width=\wA cm, minimum height=\hTop cm, anchor=north west] (P1) at (NW) {};
+\node[panel, minimum width=\wB cm, minimum height=\hTop cm, anchor=north west] (P2) at ([xshift=\wA cm + \gap cm]NW) {};
+\node[panel, minimum width=\wC cm, minimum height=\hTop cm, anchor=north west] (P3) at ([xshift=\wA cm + \wB cm + 2*\gap cm]NW) {};
+\node[panel, minimum width=\wA cm + \wB cm + \wC cm + 2*\gap cm, minimum height=\hBot cm, anchor=north west] (P4) at ([yshift=-\hTop cm - \gap cm]NW) {};
+
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P1.north west) {1. Inputs};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P2.north west) {2. Assignment};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P3.north west) {3. Classification view};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P4.north west) {4. Confusion matrix};
+
+% Panel 1
+\node[body, anchor=south west] at ([xshift=0.36cm,yshift=-0.92cm]P1.north west) {Image};
+\node[body, text=kwdarkgreen, anchor=south] at ([xshift=3.10cm,yshift=-0.92cm]P1.north west) {Ground Truth};
+\node[body, text=kwdarkblue, anchor=south east] at ([xshift=5.78cm,yshift=-0.92cm]P1.north west) {Predictions};
+
+\node[anchor=north west, inner sep=0pt] (I1) at ([xshift=0.22cm,yshift=-1.04cm]P1.north west)
+    {\includegraphics[width=1.72cm]{panel1_source_image.png}};
+\node[anchor=north west, inner sep=0pt] (I2) at ([xshift=2.08cm,yshift=-1.04cm]P1.north west)
+    {\includegraphics[width=1.72cm]{panel1_source_image.png}};
+\node[anchor=north west, inner sep=0pt] (I3) at ([xshift=3.94cm,yshift=-1.04cm]P1.north west)
+    {\includegraphics[width=1.72cm]{panel1_source_image.png}};
+
+% Ground-truth boxes
+\draw[kwgreen, line width=1.0pt] ([xshift=0.20cm,yshift=-0.40cm]I2.north west) rectangle ([xshift=0.92cm,yshift=-1.84cm]I2.north west);
+\draw[kwgreen, line width=1.0pt] ([xshift=1.08cm,yshift=-1.12cm]I2.north west) rectangle ([xshift=1.60cm,yshift=-1.92cm]I2.north west);
+
+% Predicted boxes
+\draw[kwblue, line width=1.0pt] ([xshift=0.14cm,yshift=-0.34cm]I3.north west) rectangle ([xshift=0.98cm,yshift=-1.92cm]I3.north west);
+\draw[kwblue, line width=1.0pt] ([xshift=1.02cm,yshift=-1.04cm]I3.north west) rectangle ([xshift=1.63cm,yshift=-1.98cm]I3.north west);
+\draw[kwblue, line width=1.0pt] ([xshift=1.34cm,yshift=-1.98cm]I3.north west) rectangle ([xshift=1.70cm,yshift=-2.34cm]I3.north west);
+
+% Panel 2
+\node[body, align=center, anchor=north] at ([yshift=-0.54cm]P2.north)
+    {Match predicted boxes to truth boxes};
+\node[note, anchor=north] at ([yshift=-0.74cm]P2.north)
+    {e.g., IoU thresholding + one-to-one matching};
+
+\node[truthbox] (T1) at ([xshift=1.00cm,yshift=-1.96cm]P2.north west) {$T_1$\, {\tiny(dog)}};
+\node[truthbox, below=0.44cm of T1] (T2) {$T_2$\, {\tiny(cat)}};
+
+\node[predbox] (P1b) at ([xshift=-2.25cm,yshift=-1.72cm]P2.north east) {$P_1$};
+\node[predbox, below=0.20cm of P1b] (P2b) {$P_2$};
+\node[predbox, below=0.26cm of P2b] (P3b) {$P_3$};
+\node[predbox, below=0.20cm of P3b] (P4b) {$P_4$};
+
+\draw[arrow] (T1.east) -- (P1b.west);
+\draw[arrow] (T2.east) -- (P3b.west);
+\draw[darrow] (T1.east) -- (P2b.west);
+\draw[darrow] (T2.east) -- (P4b.west);
+
+\node[note, text=kwdarkgreen, anchor=west] at ([xshift=0.03cm]P1b.east) {matched};
+\node[note, text=kwred, anchor=west] at ([xshift=0.03cm]P2b.east) {unmatched};
+\node[note, text=kwdarkgreen, anchor=west] at ([xshift=0.03cm]P3b.east) {matched};
+\node[note, text=kwred, anchor=west] at ([xshift=0.03cm]P4b.east) {unmatched};
+
+% Panel 3
+\node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=0.34cm,yshift=-0.78cm]P3.north west) {%
+\tikz{\node[dot,fill=kwgreen]{};}\hspace{0.15em}\TP: matched truth--prediction pair\\[0.40em]
+\tikz{\node[dot,fill=kwred]{};}\hspace{0.15em}\FP: unmatched prediction\\[0.40em]
+\tikz{\node[dot,fill=kworange]{};}\hspace{0.15em}\FN: unmatched truth\\[0.40em]
+\tikz{\node[dot,fill=kwblue]{};}\hspace{0.15em}\TN: background / non-object\\\phantom{xx}case correctly left unpredicted};
+
+\node[draw=black!18, rounded corners=2pt, inner sep=4pt, anchor=south east, font=\tiny] at ([xshift=-0.24cm,yshift=0.20cm]P3.south east) {
+\begin{tabular}{@{}ll@{}}
+$T_1 \leftrightarrow P_1$ & $\to$ \TP \\
+$T_2 \leftrightarrow P_3$ & $\to$ \TP \\
+$P_2$ unmatched & $\to$ \FP \\
+$P_4$ unmatched & $\to$ \FP \\
+\end{tabular}};
+
+% Panel 4 - manual confusion matrix
+\coordinate (CMNW) at ([xshift=1.72cm,yshift=-1.18cm]P4.north west);
+\draw[fill=kwgreen!20, draw=white] (CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kworange!22, draw=white] ([xshift=2.12cm]CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kwred!16, draw=white] ([yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
+\draw[fill=kwblue!16, draw=white] ([xshift=2.12cm,yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
+
+\node[body] at ($(CMNW)+(0.99,-0.40)$) {\TP};
+\node[note,align=center] at ($(CMNW)+(0.99,-0.83)$) {matched};
+\node[body] at ($(CMNW)+(3.11,-0.40)$) {\FN};
+\node[note,align=center] at ($(CMNW)+(3.11,-0.84)$) {unmatched\\truth};
+\node[body] at ($(CMNW)+(0.99,-1.73)$) {\FP};
+\node[note,align=center] at ($(CMNW)+(0.99,-2.14)$) {unmatched\\prediction};
+\node[body] at ($(CMNW)+(3.11,-1.73)$) {\TN};
+\node[note,align=center] at ($(CMNW)+(3.11,-2.14)$) {correctly no\\detection};
+
+\node[body, anchor=south] at ($(CMNW)+(2.05,0.10)$) {Predicted};
+\node[note, anchor=south] at ($(CMNW)+(0.99,-0.08)$) {positive};
+\node[note, anchor=south] at ($(CMNW)+(3.11,-0.08)$) {negative};
+\node[body, rotate=90] at ($(CMNW)+(-0.82,-1.28)$) {Actual};
+\node[note, anchor=east] at ($(CMNW)+(-0.18,-0.61)$) {positive};
+\node[note, anchor=east] at ($(CMNW)+(-0.18,-1.95)$) {negative};
+
+\node[body, align=left, text width=5.35cm, anchor=north west] at ([xshift=5.95cm,yshift=-1.18cm]P4.north west) {
+\textbf{From detection to classification.}\\[0.15em]
+Once box assignment is fixed, matched truth--prediction pairs count as \TP. Unmatched predictions count as \FP. Unmatched truth boxes count as \FN. True negatives, \TN, correspond to valid non-object regions or candidate boxes that were correctly left empty.};
+
+\node[body, align=left, text width=3.10cm, anchor=north east] at ([xshift=-0.24cm,yshift=-1.18cm]P4.north east) {
+\textbf{Why this matters.}\\[0.15em]
+Precision, recall, and $F_1$ ignore \TN, but metrics such as MCC use the full confusion matrix. This motivates making the {\TN} interpretation explicit.};
+
+\node[note, align=center, anchor=south] at ([yshift=0.10cm]P4.south)
+    {After assignment, object detection can be analyzed with standard binary-classification metrics.};
+
+\end{tikzpicture}
+\end{document}
+
