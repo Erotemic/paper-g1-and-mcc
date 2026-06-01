@@ -1,0 +1,24 @@
+type: ipfs-sidecar
+cid: bafybeiew4gfjoepjwqbtnmzmh4jnvzjje2qws55yyw36clnskfo54sxaii
+rel_path: cat-and-dog.jpg
+size: 814.45 KiB
+num_items: 1
+add_config:
+  path: cat-and-dog.jpg
+  name: null
+  recursive: true
+  progress: true
+  cid_version: 1
+  raw_leaves: false
+  only_hash: false
+  pin: true
+  sidecar: true
+  update_gitignore: true
+  git_add_sidecar: true
+  dry_run: false
+add_datetime: 2026-06-01T112356-5
+add_duration: 2.872119511011988
+local_quickstat:
+  kind: file
+  bytes: 833996
+  mtime: 1780330478.5223608
