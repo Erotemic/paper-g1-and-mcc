@@ -49,7 +49,7 @@
     >=Latex,
     font=\sffamily,
     panel/.style={draw=black!18, rounded corners=2pt, line width=0.7pt, fill=white},
-    ptitle/.style={font=\bfseries\normalsize, text=kwdarkblue, anchor=north west},
+    ptitle/.style={font=\bfseries\normalsize, text=kwdarkblue, anchor=north},
     body/.style={font=\scriptsize, text=black},
     note/.style={font=\tiny, text=black!65},
     arrow/.style={-Latex, line width=0.95pt, draw=black!65},
@@ -78,11 +78,11 @@
 \node[panel, minimum width=\wD cm, minimum height=\hBot cm, anchor=north west] (P4) at ([yshift=-\hTop cm - \gap cm]NW) {};
 \node[panel, minimum width=\wE cm, minimum height=\hBot cm, anchor=north west] (P5) at ([xshift=\wD cm + \gap cm, yshift=-\hTop cm - \gap cm]NW) {};
 
-\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P1.north west) {1. Inputs};
-\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P2.north west) {2. Assignment};
-\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P3.north west) {3. Classification view};
-\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P4.north west) {4. Confusion matrix};
-\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P5.north west) {5. Where are the \TN?};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P1.north) {1. Inputs};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P2.north) {2. Assignment};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P3.north) {3. Classification view};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P4.north) {4. Confusion matrix};
+\node[ptitle] at ([xshift=0.18cm,yshift=-0.16cm]P5.north) {5. Where are the \TN?};
 
 % =====================  Panel 1: image, truth, predictions  =============
 \node[body, anchor=south west]  at ([xshift=0.70cm,yshift=-1.20cm]P1.north west) {Image};
@@ -115,9 +115,9 @@ Dog found (T1/P1), grass falsely flagged (P2), cat missed (T2).};
 Photo: publicdomainpictures.net \#24076, CC0.};
 
 % =====================  Panel 2: assignment  ===========================
-\node[body, align=center, anchor=north] at ([yshift=-0.52cm]P2.north)
+\node[body, align=center, anchor=north] at ([yshift=-0.62cm]P2.north)
     {Match each prediction to a truth box};
-\node[note, anchor=north] at ([yshift=-0.86cm]P2.north)
+\node[note, anchor=north] at ([yshift=-0.96cm]P2.north)
     {e.g.\ one-to-one by IoU overlap};
 
 \coordinate (Q) at (P2.north west);
@@ -126,24 +126,24 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[body, anchor=south] at ($(Q)+(4.45,-1.76)$) {Result};
 
 % Row 1: matched -> TP
-\node[tbox] (T1) at ($(Q)+(1.15,-2.08)$) {$T_1$};
-\node[pbox] (P1b) at ($(Q)+(3.05,-2.08)$) {$P_1$};
+\node[tbox] (T1) at ($(Q)+(1.15,-2.18)$) {$T_1$};
+\node[pbox] (P1b) at ($(Q)+(3.05,-2.18)$) {$P_1$};
 \draw[arrow, draw=kwgreen] (T1.east) -- (P1b.west);
-\node at ($(Q)+(4.45,-2.08)$) {\TP};
+\node at ($(Q)+(4.45,-2.18)$) {\TP};
 
 % Row 2: truth with no prediction -> FN
-\node[tbox] (T2) at ($(Q)+(1.15,-3.02)$) {$T_2$};
-\node[eslot] (E1) at ($(Q)+(3.05,-3.02)$) {$\varnothing$};
+\node[tbox] (T2) at ($(Q)+(1.15,-3.12)$) {$T_2$};
+\node[eslot] (E1) at ($(Q)+(3.05,-3.12)$) {$\varnothing$};
 \draw[darrow, draw=kworange] (T2.east) -- (E1.west);
-\node at ($(Q)+(4.45,-3.02)$) {\FN};
+\node at ($(Q)+(4.45,-3.12)$) {\FN};
 
 % Row 3: prediction with no truth -> FP
-\node[eslot] (E2) at ($(Q)+(1.15,-3.96)$) {$\varnothing$};
-\node[pbox] (P2b) at ($(Q)+(3.05,-3.96)$) {$P_2$};
+\node[eslot] (E2) at ($(Q)+(1.15,-4.06)$) {$\varnothing$};
+\node[pbox] (P2b) at ($(Q)+(3.05,-4.06)$) {$P_2$};
 \draw[darrow, draw=kwred] (P2b.west) -- (E2.east);
-\node at ($(Q)+(4.45,-3.96)$) {\FP};
+\node at ($(Q)+(4.45,-4.06)$) {\FP};
 
-\node[note, anchor=south] at ([yshift=0.34cm]P2.south)
+\node[note, anchor=south] at ([yshift=0.14cm]P2.south)
     {solid = matched\enspace\textbullet\enspace dashed = no match ($\varnothing$)};
 
 % =====================  Panel 3: classification view (outcome coloring)  ====
@@ -168,10 +168,10 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[imtag, fill=kworange] at ([xshift=0.851cm,yshift=-1.056cm]J1.north west) {FN};
 
 % Prediction image: dog -> TP (green), grass box -> FP (red)
-\draw[kwgreen, line width=1.2pt] ([xshift=0.048cm,yshift=-0.408cm]J2.north west) rectangle ([xshift=0.936cm,yshift=-2.280cm]J2.north west);
-\draw[kwred,   line width=1.2pt] ([xshift=1.120cm,yshift=-0.144cm]J2.north west) rectangle ([xshift=1.472cm,yshift=-0.720cm]J2.north west);
-\node[imtag, fill=kwgreen]                  at ([xshift=0.048cm,yshift=-0.408cm]J2.north west) {TP};
-\node[imtag, fill=kwred, anchor=north east] at ([xshift=1.472cm,yshift=-0.144cm]J2.north west) {FP};
+\draw[kwgreen, line width=1.2pt] ([xshift=0.048cm,yshift=-0.418cm]J2.north west) rectangle ([xshift=0.936cm,yshift=-2.290cm]J2.north west);
+\draw[kwred,   line width=1.2pt] ([xshift=1.120cm,yshift=-0.154cm]J2.north west) rectangle ([xshift=1.472cm,yshift=-0.730cm]J2.north west);
+\node[imtag, fill=kwgreen]                  at ([xshift=0.048cm,yshift=-0.418cm]J2.north west) {TP};
+\node[imtag, fill=kwred, anchor=north east] at ([xshift=1.472cm,yshift=-0.154cm]J2.north west) {FP};
 
 % Legend: define each outcome and its color.
 \node[note, anchor=north west] at ([xshift=0.34cm,yshift=-3.62cm]P3.north west) {Each match or leftover is one of:};
@@ -183,7 +183,7 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \tikz{\node[dot,fill=kwblue]{};}\,\TN\ empty region};
 
 % =====================  Panel 4: confusion matrix  =====================
-\coordinate (CMNW) at ([xshift=1.20cm,yshift=-1.18cm]P4.north west);
+\coordinate (CMNW) at ([xshift=0.95cm,yshift=-1.18cm]P4.north west);
 \draw[fill=kwgreen!20,  draw=white] (CMNW) rectangle ++(1.98,-1.22);
 \draw[fill=kworange!22, draw=white] ([xshift=2.12cm]CMNW) rectangle ++(1.98,-1.22);
 \draw[fill=kwred!16,    draw=white] ([yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
@@ -201,12 +201,12 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[body, anchor=south] at ($(CMNW)+(2.05,0.10)$) {Predicted};
 \node[note, anchor=south] at ($(CMNW)+(0.99,-0.08)$) {positive};
 \node[note, anchor=south] at ($(CMNW)+(3.11,-0.08)$) {negative};
-\node[body, rotate=90] at ($(CMNW)+(-0.78,-1.28)$) {Real};
+\node[body, rotate=90] at ($(CMNW)+(-0.60,-1.28)$) {Real};
 \node[note, rotate=90, anchor=south] at ($(CMNW)+(-0.16,-0.61)$) {positive};
 \node[note, rotate=90, anchor=south] at ($(CMNW)+(-0.16,-1.95)$) {negative};
 
 % --- Keep the "view detection as classification" takeaway beside the matrix.
-\node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=5.70cm,yshift=-0.36cm]P4.north west) {
+\node[body, align=left, text width=4.05cm, anchor=north west] at ([xshift=5.25cm,yshift=-0.90cm]P4.north west) {
 %\textbf{View detection as classification.}\\[0.3em]
 With the assignment fixed, we tally the true positives (\TP), false positives (\FP), and false negatives (\FN) --- one of each here, which supports many common metrics.\\[0.4em]
 True negatives (\TN), though, are typically ignored in detection, which limits the metrics we can compute, like the MCC.
