@@ -128,23 +128,23 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 % Row 1: matched -> TP
 \node[tbox] (T1) at ($(Q)+(1.15,-2.08)$) {$T_1$};
 \node[pbox] (P1b) at ($(Q)+(3.05,-2.08)$) {$P_1$};
-\draw[arrow] (T1.east) -- (P1b.west);
+\draw[arrow, draw=kwgreen] (T1.east) -- (P1b.west);
 \node at ($(Q)+(4.45,-2.08)$) {\TP};
 
 % Row 2: truth with no prediction -> FN
 \node[tbox] (T2) at ($(Q)+(1.15,-3.02)$) {$T_2$};
 \node[eslot] (E1) at ($(Q)+(3.05,-3.02)$) {$\varnothing$};
-\draw[darrow] (T2.east) -- (E1.west);
+\draw[darrow, draw=kworange] (T2.east) -- (E1.west);
 \node at ($(Q)+(4.45,-3.02)$) {\FN};
 
 % Row 3: prediction with no truth -> FP
 \node[eslot] (E2) at ($(Q)+(1.15,-3.96)$) {$\varnothing$};
 \node[pbox] (P2b) at ($(Q)+(3.05,-3.96)$) {$P_2$};
-\draw[darrow] (P2b.west) -- (E2.east);
+\draw[darrow, draw=kwred] (P2b.west) -- (E2.east);
 \node at ($(Q)+(4.45,-3.96)$) {\FP};
 
-\node[note, anchor=south] at ([yshift=0.10cm]P2.south)
-    {solid = matched\quad\textbullet\quad dashed = no match ($\varnothing$)};
+\node[note, anchor=south] at ([yshift=0.34cm]P2.south)
+    {solid = matched\enspace\textbullet\enspace dashed = no match ($\varnothing$)};
 
 % =====================  Panel 3: classification view (outcome coloring)  ====
 % Same truth/prediction pair as Panel 1, but each box is now recolored by the
@@ -190,13 +190,13 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \draw[fill=kwblue!16,   draw=white] ([xshift=2.12cm,yshift=-1.34cm]CMNW) rectangle ++(1.98,-1.22);
 
 \node[body] at ($(CMNW)+(0.99,-0.40)$) {\TP};
-\node[note,align=center] at ($(CMNW)+(0.99,-0.84)$) {matched\\(here: 1)};
+\node[note,align=center] at ($(CMNW)+(0.99,-0.84)$) {matched pair\\(here: 1)};
 \node[body] at ($(CMNW)+(3.11,-0.40)$) {\FN};
 \node[note,align=center] at ($(CMNW)+(3.11,-0.84)$) {missed truth\\(here: 1)};
 \node[body] at ($(CMNW)+(0.99,-1.73)$) {\FP};
-\node[note,align=center] at ($(CMNW)+(0.99,-2.17)$) {spurious box\\(here: 1)};
+\node[note,align=center] at ($(CMNW)+(0.99,-2.17)$) {false box\\(here: 1)};
 \node[body] at ($(CMNW)+(3.11,-1.73)$) {\TN};
-\node[note,align=center] at ($(CMNW)+(3.11,-2.17)$) {correctly empty\\(here: 0)};
+\node[note,align=center] at ($(CMNW)+(3.11,-2.17)$) {empty region\\(here: undefined)};
 
 \node[body, anchor=south] at ($(CMNW)+(2.05,0.10)$) {Predicted};
 \node[note, anchor=south] at ($(CMNW)+(0.99,-0.08)$) {positive};
@@ -206,10 +206,11 @@ Photo: publicdomainpictures.net \#24076, CC0.};
 \node[note, rotate=90, anchor=south] at ($(CMNW)+(-0.16,-1.95)$) {negative};
 
 % --- Keep the "view detection as classification" takeaway beside the matrix.
-\node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=5.70cm,yshift=-1.18cm]P4.north west) {
+\node[body, align=left, text width=3.45cm, anchor=north west] at ([xshift=5.70cm,yshift=-0.36cm]P4.north west) {
 %\textbf{View detection as classification.}\\[0.3em]
-With the assignment fixed, each box is one cell of this matrix: a matched pair is a \TP, a prediction with no truth a \FP, and a truth with no prediction a \FN.\\[0.3em]
-Our small example gives one of each. But notice that \TN{} is zero and typically uncounted.};
+With the assignment fixed, we tally the true positives (\TP), false positives (\FP), and false negatives (\FN) --- one of each here, which supports many common metrics.\\[0.4em]
+True negatives (\TN), though, are typically ignored in detection, which limits the metrics we can compute, like the MCC.
+};
 
 % =====================  Panel 5: where are the TN?  ====================
 % One more copy of the image.  The two real objects (T1, T2) are boxed; every
@@ -229,24 +230,29 @@ Our small example gives one of each. But notice that \TN{} is zero and typically
     \ifnum\hit=0
       \pgfmathsetmacro{\bxa}{(\i+0.16)/8*\Wt}\pgfmathsetmacro{\bxb}{(\i+0.84)/8*\Wt}
       \pgfmathsetmacro{\bya}{-(\j+0.16)/12*\Ht}\pgfmathsetmacro{\byb}{-(\j+0.84)/12*\Ht}
-      \draw[kwblue, line width=0.25pt, fill=kwblue, fill opacity=0.13]
+      \draw[kwblue, line width=0.7pt, fill=kwblue, fill opacity=0.15]
         ([xshift=\bxa cm,yshift=\bya cm]IT.north west) rectangle ([xshift=\bxb cm,yshift=\byb cm]IT.north west);
     \fi
   }}
 % A couple of larger background boxes, to show that ANY size counts too.
-\draw[kwblue, line width=0.5pt, fill=kwblue, fill opacity=0.07] ([xshift=0.10cm,yshift=-0.06cm]IT.north west) rectangle ([xshift=1.10cm,yshift=-0.39cm]IT.north west);
-\draw[kwblue, line width=0.5pt, fill=kwblue, fill opacity=0.07] ([xshift=1.28cm,yshift=-0.15cm]IT.north west) rectangle ([xshift=1.94cm,yshift=-1.20cm]IT.north west);
+\draw[kwblue, line width=1.0pt, fill=kwblue, fill opacity=0.08] ([xshift=0.10cm,yshift=-0.06cm]IT.north west) rectangle ([xshift=1.10cm,yshift=-0.39cm]IT.north west);
+\draw[kwblue, line width=1.0pt, fill=kwblue, fill opacity=0.08] ([xshift=1.28cm,yshift=-0.15cm]IT.north west) rectangle ([xshift=1.94cm,yshift=-1.20cm]IT.north west);
 
-% The two real objects, for reference.
-\draw[truthcol, line width=1.1pt] ([xshift=0.06cm,yshift=-0.45cm]IT.north west) rectangle ([xshift=1.22cm,yshift=-2.88cm]IT.north west);
-\draw[truthcol, line width=1.1pt] ([xshift=1.064cm,yshift=-1.32cm]IT.north west) rectangle ([xshift=1.934cm,yshift=-2.79cm]IT.north west);
-\node[imtag, fill=truthcol] at ([xshift=0.06cm,yshift=-0.45cm]IT.north west) {T1};
-\node[imtag, fill=truthcol] at ([xshift=1.064cm,yshift=-1.32cm]IT.north west) {T2};
+% A scatter of varied boxes along the bottom strip of grass.
+\draw[kwblue, line width=0.7pt, fill=kwblue, fill opacity=0.13] ([xshift=0.04cm,yshift=-2.70cm]IT.north west) rectangle ([xshift=0.36cm,yshift=-2.955cm]IT.north west);
+\draw[kwblue, line width=0.9pt, fill=kwblue, fill opacity=0.10] ([xshift=0.26cm,yshift=-2.58cm]IT.north west) rectangle ([xshift=0.72cm,yshift=-2.91cm]IT.north west);
+\draw[kwblue, line width=0.6pt, fill=kwblue, fill opacity=0.14] ([xshift=0.60cm,yshift=-2.76cm]IT.north west) rectangle ([xshift=0.88cm,yshift=-3.00cm]IT.north west);
+\draw[kwblue, line width=1.0pt, fill=kwblue, fill opacity=0.08] ([xshift=0.80cm,yshift=-2.64cm]IT.north west) rectangle ([xshift=1.32cm,yshift=-2.97cm]IT.north west);
+\draw[kwblue, line width=0.7pt, fill=kwblue, fill opacity=0.13] ([xshift=1.16cm,yshift=-2.79cm]IT.north west) rectangle ([xshift=1.48cm,yshift=-3.00cm]IT.north west);
+\draw[kwblue, line width=0.9pt, fill=kwblue, fill opacity=0.10] ([xshift=1.40cm,yshift=-2.61cm]IT.north west) rectangle ([xshift=1.92cm,yshift=-2.955cm]IT.north west);
+
 \node[imtag, fill=kwblue] at ([xshift=0.04cm,yshift=-0.04cm]IT.north west) {TN};
 
-\node[body, align=left, text width=4.05cm, anchor=north west] at ([xshift=2.75cm,yshift=-1.05cm]P5.north west) {
-Boxing the two objects leaves \emph{everything else}: each box you could draw that matches no real object is a \TN --- at every position and \emph{every} size.\\[0.35em]
-There is no natural limit, so the usual metrics ignore \TN. This paper instead asks what the score approaches as \TN${}\to\infty$.};
+\node[body, align=left, text width=4.05cm, anchor=north west] at ([xshift=2.75cm,yshift=-0.85cm]P5.north west) {
+What if we insist on counting \TN?
+Every box you could draw that matches no real object is a \TN --- at every position and \emph{every} size.\\[0.35em]
+
+The number is astronomically large. Rather than pick a value, we ask what happens if we take the limit and let \TN{} grow without bound: \TN${}\to\infty$.};
 
 \end{tikzpicture}
 \end{document}
